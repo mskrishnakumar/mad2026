@@ -1,36 +1,134 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MAD2026 - Hackathon Starter
 
-## Getting Started
+A ready-to-use Next.js template with patterns from CareerAdvisor & ScholarshipFinder.
 
-First, run the development server:
+## Quick Start
 
 ```bash
+# Install dependencies
+npm install
+
+# Copy environment file and configure
+cp .env.example .env.local
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── api/                # API routes
+│   │   ├── chat/           # Chat endpoint (streaming ready)
+│   │   ├── recommendations/# Hybrid scoring endpoint
+│   │   └── health/         # Health check
+│   ├── layout.tsx          # Root layout
+│   └── page.tsx            # Home page
+├── components/
+│   ├── ui/                 # shadcn/ui components
+│   ├── layout/             # Header, Container
+│   └── ChatWindow.tsx      # Reusable chat component
+├── lib/
+│   ├── types.ts            # TypeScript definitions
+│   ├── utils.ts            # Helper functions
+│   ├── embeddings.ts       # Vector search utilities
+│   ├── scoring.ts          # Recommendation scoring
+│   └── openai.ts           # AI client setup
+├── hooks/
+│   └── useChat.ts          # Chat state management
+├── services/
+│   └── apiClient.ts        # HTTP client wrapper
+├── context/
+│   └── AppContext.tsx      # Global state
+├── data/                   # JSON data files
+└── constants/              # App constants
+```
 
-## Learn More
+## Available Components
 
-To learn more about Next.js, take a look at the following resources:
+### UI Components (shadcn/ui)
+- `Button`, `Card`, `Input`, `Badge`, `Dialog`, `Textarea`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Custom Components
+- `ChatWindow` - Full chat interface with suggestions
+- `Header` - Navigation header
+- `Container` - Consistent layout wrapper
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## API Endpoints
 
-## Deploy on Vercel
+### POST /api/chat
+Send chat messages. Configure AI provider in `src/lib/openai.ts`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```typescript
+// Request
+{ message: string, context?: { userProfile?, conversationHistory? } }
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+// Response
+{ id, role, content, createdAt }
+```
+
+### POST /api/recommendations
+Get personalized recommendations with hybrid scoring.
+
+```typescript
+// Request
+{ profile: object, quickMode?: boolean }
+
+// Response
+{ recommendations: [...], meta: { total, returned, mode, processingTimeMs } }
+```
+
+### GET /api/health
+Health check endpoint.
+
+## Patterns Used
+
+### Hybrid Scoring
+Combines rule-based eligibility checks with semantic similarity:
+```typescript
+finalScore = ELIGIBILITY_WEIGHT * eligibilityScore + SEMANTIC_WEIGHT * semanticScore
+```
+
+### RAG (Retrieval-Augmented Generation)
+Chat responses are enhanced with relevant context:
+1. Search for relevant items based on user query
+2. Inject context into system prompt
+3. Generate response with full context
+
+### Quick Mode
+Fast responses using only rule-based scoring (no AI calls).
+
+## Adding AI Support
+
+### Azure OpenAI
+1. Uncomment the Azure section in `src/lib/openai.ts`
+2. Install: `npm install @ai-sdk/azure ai openai`
+3. Configure `.env.local` with your Azure credentials
+
+### Supabase Auth
+1. Install: `npm install @supabase/ssr`
+2. Add a `src/lib/supabase.ts` client
+3. Configure `.env.local` with Supabase credentials
+
+## Commands
+
+```bash
+npm run dev      # Development server
+npm run build    # Production build
+npm run start    # Start production server
+npm run lint     # Run ESLint
+```
+
+## Tips for Hackathon
+
+1. **Start simple** - Get core features working first
+2. **Use quick mode** - Faster responses while developing
+3. **Prepare demo data** - Have pre-filled profiles ready
+4. **Test happy path** - Make the main flow flawless
+5. **Commit often** - Easy rollbacks save time
+
+Good luck!
