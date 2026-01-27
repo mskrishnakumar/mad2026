@@ -2,6 +2,35 @@
 
 A ready-to-use Next.js template with patterns from CareerAdvisor & ScholarshipFinder.
 
+## Prerequisites
+
+Install the required tools using Chocolatey (run PowerShell as Administrator):
+
+```powershell
+# Install Chocolatey (if not already installed)
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+
+# Install all prerequisites
+choco install git nodejs-lts azure-cli gh typescript -y
+
+# Verify installations
+node --version      # Should show v20.x or higher
+npm --version       # Should show 10.x or higher
+gh --version        # GitHub CLI
+az --version        # Azure CLI
+tsc --version       # TypeScript compiler
+```
+
+### What Gets Installed
+
+| Tool | Command | Purpose |
+|------|---------|---------|
+| Git | `git` | Version control |
+| Node.js LTS | `node`, `npm` | JavaScript runtime & package manager |
+| GitHub CLI | `gh` | GitHub operations from terminal |
+| Azure CLI | `az` | Azure resource management |
+| TypeScript | `tsc` | TypeScript compiler (global) |
+
 ## Quick Start
 
 ```bash
