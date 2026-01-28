@@ -22,6 +22,8 @@ import {
   ChevronLeft,
   ChevronRight,
   User,
+  Calendar,
+  CalendarCheck,
 } from 'lucide-react';
 import { useState, createContext, useContext } from 'react';
 
@@ -42,8 +44,9 @@ const counsellorMenuItems: SidebarItem[] = [
 ];
 
 const volunteerMenuItems: SidebarItem[] = [
-  { label: 'Dashboard', href: '/volunteer/dashboard', icon: LayoutDashboard },
-  { label: 'My Students', href: '/volunteer/students', icon: Users },
+  { label: 'Volunteer Onboarding', href: '/volunteer/onboarding', icon: UserPlus },
+  { label: 'Select Availability', href: '/volunteer/availability', icon: Calendar },
+  { label: 'Assigned Sessions', href: '/volunteer/sessions', icon: CalendarCheck },
 ];
 
 const studentMenuItems: SidebarItem[] = [
