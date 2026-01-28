@@ -1,0 +1,122 @@
+[
+  {
+    "id": "PRG001",
+    "name": "Retail Sales Associate",
+    "category": "Retail",
+    "description": "Train to become a retail sales professional with customer service excellence",
+    "required_skills": "Communication, Customer Service, Basic Math",
+    "education_level": "10th Pass",
+    "duration_months": "3",
+    "certification": "NSDC Certified",
+    "employment_rate": "85",
+    "avg_salary": "15000"
+  },
+  {
+    "id": "PRG002",
+    "name": "IT Support Technician",
+    "category": "IT",
+    "description": "Learn computer hardware, software troubleshooting and IT support skills",
+    "required_skills": "Computer Basics, Problem Solving, English Speaking",
+    "education_level": "12th Pass",
+    "duration_months": "4",
+    "certification": "CompTIA Certified",
+    "employment_rate": "78",
+    "avg_salary": "18000"
+  },
+  {
+    "id": "PRG003",
+    "name": "Healthcare Assistant",
+    "category": "Healthcare",
+    "description": "Training for basic healthcare support roles in hospitals and clinics",
+    "required_skills": "Healthcare Basics, Communication, Team Work",
+    "education_level": "12th Pass",
+    "duration_months": "6",
+    "certification": "State Health Board Certified",
+    "employment_rate": "82",
+    "avg_salary": "16000"
+  },
+  {
+    "id": "PRG004",
+    "name": "Hospitality Professional",
+    "category": "Hospitality",
+    "description": "Comprehensive training for hotel and restaurant industry roles",
+    "required_skills": "Hospitality, Customer Service, Communication",
+    "education_level": "10th Pass",
+    "duration_months": "3",
+    "certification": "FSSAI Certified",
+    "employment_rate": "80",
+    "avg_salary": "14000"
+  },
+  {
+    "id": "PRG005",
+    "name": "Data Entry Operator",
+    "category": "IT",
+    "description": "Learn typing, MS Office and data management skills",
+    "required_skills": "Computer Basics, Data Entry, MS Office",
+    "education_level": "10th Pass",
+    "duration_months": "2",
+    "certification": "Microsoft Office Certified",
+    "employment_rate": "88",
+    "avg_salary": "12000"
+  },
+  {
+    "id": "PRG006",
+    "name": "Banking & Financial Services",
+    "category": "Banking",
+    "description": "Prepare for entry-level banking and financial services roles",
+    "required_skills": "Mathematics, Communication, Computer Basics",
+    "education_level": "Graduate",
+    "duration_months": "4",
+    "certification": "IIBF Certified",
+    "employment_rate": "75",
+    "avg_salary": "20000"
+  },
+  {
+    "id": "PRG007",
+    "name": "Electrical Technician",
+    "category": "Technical",
+    "description": "Technical training for electrical maintenance and installation",
+    "required_skills": "Electrical Basics, Problem Solving, Mathematics",
+    "education_level": "ITI/Diploma",
+    "duration_months": "6",
+    "certification": "ITI Certified",
+    "employment_rate": "72",
+    "avg_salary": "17000"
+  },
+  {
+    "id": "PRG008",
+    "name": "Customer Service Executive",
+    "category": "BPO",
+    "description": "Training for call center and customer support roles",
+    "required_skills": "Communication, English Speaking, Customer Service",
+    "education_level": "12th Pass",
+    "duration_months": "2",
+    "certification": "NASSCOM Certified",
+    "employment_rate": "90",
+    "avg_salary": "16000"
+  },
+  {
+    "id": "PRG009",
+    "name": "Automotive Mechanic",
+    "category": "Technical",
+    "description": "Learn vehicle maintenance, repair and diagnostic skills",
+    "required_skills": "Mechanical Skills, Problem Solving, Team Work",
+    "education_level": "ITI/Diploma",
+    "duration_months": "6",
+    "certification": "ASDC Certified",
+    "employment_rate": "76",
+    "avg_salary": "15000"
+  },
+  {
+    "id": "PRG010",
+    "name": "Digital Marketing Associate",
+    "category": "IT",
+    "description": "Learn social media, SEO and digital marketing fundamentals",
+    "required_skills": "Computer Basics, Communication, English Speaking",
+    "education_level": "Graduate",
+    "duration_months": "3",
+    "certification": "Google Certified",
+    "employment_rate": "70",
+    "avg_salary": "18000"
+  }
+]

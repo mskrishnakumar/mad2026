@@ -1,0 +1,11 @@
+id,name,category,description,required_skills,education_level,duration_months,certification,employment_rate,avg_salary
+"PRG001","Retail Sales Associate","Retail","Train to become a retail sales professional with customer service excellence","Communication, Customer Service, Basic Math","10th Pass","3","NSDC Certified","85","15000"
+"PRG002","IT Support Technician","IT","Learn computer hardware, software troubleshooting and IT support skills","Computer Basics, Problem Solving, English Speaking","12th Pass","4","CompTIA Certified","78","18000"
+"PRG003","Healthcare Assistant","Healthcare","Training for basic healthcare support roles in hospitals and clinics","Healthcare Basics, Communication, Team Work","12th Pass","6","State Health Board Certified","82","16000"
+"PRG004","Hospitality Professional","Hospitality","Comprehensive training for hotel and restaurant industry roles","Hospitality, Customer Service, Communication","10th Pass","3","FSSAI Certified","80","14000"
+"PRG005","Data Entry Operator","IT","Learn typing, MS Office and data management skills","Computer Basics, Data Entry, MS Office","10th Pass","2","Microsoft Office Certified","88","12000"
+"PRG006","Banking & Financial Services","Banking","Prepare for entry-level banking and financial services roles","Mathematics, Communication, Computer Basics","Graduate","4","IIBF Certified","75","20000"
+"PRG007","Electrical Technician","Technical","Technical training for electrical maintenance and installation","Electrical Basics, Problem Solving, Mathematics","ITI/Diploma","6","ITI Certified","72","17000"
+"PRG008","Customer Service Executive","BPO","Training for call center and customer support roles","Communication, English Speaking, Customer Service","12th Pass","2","NASSCOM Certified","90","16000"
+"PRG009","Automotive Mechanic","Technical","Learn vehicle maintenance, repair and diagnostic skills","Mechanical Skills, Problem Solving, Team Work","ITI/Diploma","6","ASDC Certified","76","15000"
+"PRG010","Digital Marketing Associate","IT","Learn social media, SEO and digital marketing fundamentals","Computer Basics, Communication, English Speaking","Graduate","3","Google Certified","70","18000"

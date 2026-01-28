@@ -3,11 +3,9 @@ export interface Student {
   name: string;
   age: string;
   gender: string;
-  school: string;
-  grade: string;
   contact_phone: string;
   contact_email: string;
-  education_level: string;
+  education_level: string;  // 'Below 10th' | '10th Pass' | '12th Pass' | 'ITI/Diploma' | 'Graduate' | 'Post Graduate'
   status: 'Active' | 'Matched' | 'Placed' | 'Onboarding';
   skills: string;
   aspirations: string;
@@ -162,17 +160,19 @@ export interface RiskFactors {
   hasMobile: boolean;                 // mobile phone access
   mobileType: 'smartphone' | 'basic' | '';
   loginAttempts: number;              // count in last 30 days
-  counsellorContactAttempts: number;  // how many times counsellor tried to reach
+  counsellorContactAttempts: number;  // how many times counsellor tried to reach (student unresponsive)
+  quizScore: number;                  // 0-100 percentage, below 40% = high risk
 }
 
 // Breakdown of risk score components
 export interface RiskScoreBreakdown {
   attendanceRisk: number;             // 0-25 points
   distanceRisk: number;               // 0-15 points
-  firstGenRisk: number;               // 0-15 points
+  firstGenRisk: number;               // 0-10 points
   connectivityRisk: number;           // 0-20 points
-  engagementRisk: number;             // 0-15 points
+  engagementRisk: number;             // 0-10 points
   contactRisk: number;                // 0-10 points
+  quizRisk: number;                   // 0-10 points (below 40% = high risk)
 }
 
 // Computed Risk Score

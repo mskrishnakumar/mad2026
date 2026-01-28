@@ -35,11 +35,9 @@ export interface StudentEntity {
   name: string;
   age: number;
   gender: string;
-  school: string;
-  grade: string;
   contactPhone: string;
   contactEmail: string;
-  educationLevel: string;
+  educationLevel: string; // 'Below 10th' | '10th Pass' | '12th Pass' | 'ITI/Diploma' | 'Graduate' | 'Post Graduate'
   status: string;
   skills: string; // JSON array stored as string
   aspirations: string; // JSON array stored as string

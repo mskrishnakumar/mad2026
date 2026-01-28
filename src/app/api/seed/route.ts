@@ -27,8 +27,6 @@ export async function POST(request: Request) {
             name: student.name,
             age: student.age,
             gender: student.gender,
-            school: student.school,
-            grade: student.grade,
             contact_phone: student.contact_phone,
             contact_email: student.contact_email,
             education_level: student.education_level,

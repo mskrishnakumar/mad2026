@@ -101,8 +101,7 @@ export default function StudentsPage() {
                 <thead>
                   <tr className="border-b bg-muted/50">
                     <th className="text-left p-4 font-medium text-muted-foreground">Student</th>
-                    <th className="text-left p-4 font-medium text-muted-foreground">School</th>
-                    <th className="text-left p-4 font-medium text-muted-foreground">Grade</th>
+                    <th className="text-left p-4 font-medium text-muted-foreground">Qualification</th>
                     <th className="text-left p-4 font-medium text-muted-foreground">Status</th>
                     <th className="text-left p-4 font-medium text-muted-foreground">Skills</th>
                     <th className="text-left p-4 font-medium text-muted-foreground">Actions</th>
@@ -117,8 +116,7 @@ export default function StudentsPage() {
                           <p className="text-sm text-muted-foreground">{student.id}</p>
                         </div>
                       </td>
-                      <td className="p-4 text-gray-600">{student.school}</td>
-                      <td className="p-4 text-gray-600">{student.grade}</td>
+                      <td className="p-4 text-gray-600">{student.education_level}</td>
                       <td className="p-4">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[student.status] || 'bg-gray-100 text-gray-700'}`}>
                           {student.status}

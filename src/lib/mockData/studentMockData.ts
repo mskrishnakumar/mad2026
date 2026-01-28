@@ -35,15 +35,14 @@ const LAST_NAMES = [
   'Chatterjee', 'Banerjee', 'Dey', 'Bose', 'Ghosh', 'Sen', 'Chandra', 'Mishra',
 ];
 
-const SCHOOLS = [
-  'Government Higher Secondary School',
-  'Kendriya Vidyalaya',
-  'Jawahar Navodaya Vidyalaya',
-  'Municipal Corporation School',
-  'State Board High School',
-  'Zilla Parishad High School',
-  'Model School',
-  'Central School',
+// Education levels matching the registration form
+const EDUCATION_LEVELS = [
+  'Below 10th',
+  '10th Pass',
+  '12th Pass',
+  'ITI/Diploma',
+  'Graduate',
+  'Post Graduate',
 ];
 
 const SKILLS_POOL = [
@@ -115,6 +114,7 @@ function generateRiskFactors(isHighRisk: boolean = false): RiskFactors {
       mobileType: Math.random() > 0.6 ? 'basic' : 'smartphone',
       loginAttempts: randomInt(0, 3),
       counsellorContactAttempts: randomInt(3, 8),
+      quizScore: randomInt(10, 35),
     };
   }
 
@@ -128,6 +128,7 @@ function generateRiskFactors(isHighRisk: boolean = false): RiskFactors {
     mobileType: Math.random() > 0.3 ? 'smartphone' : 'basic',
     loginAttempts: randomInt(5, 20),
     counsellorContactAttempts: randomInt(0, 3),
+    quizScore: randomInt(45, 95),
   };
 }
 
@@ -154,11 +155,9 @@ export function generateMockStudent(index: number): StudentExtended {
     name,
     age: String(randomInt(18, 28)),
     gender,
-    school: randomElement(SCHOOLS),
-    grade: `${randomInt(10, 12)}th Pass`,
     contact_phone: `+91 ${randomInt(70000, 99999)}${randomInt(10000, 99999)}`,
     contact_email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@email.com`,
-    education_level: randomElement(['10th Pass', '12th Pass', 'Graduate', 'Diploma']),
+    education_level: randomElement(EDUCATION_LEVELS),
     status: randomElement(['Active', 'Matched', 'Placed', 'Onboarding'] as const),
     skills: skills.join(', '),
     aspirations: aspirations.join(', '),
@@ -239,13 +238,202 @@ export function getRiskDistribution(students: StudentExtended[]): {
   return distribution;
 }
 
+/**
+ * Create 5 hardcoded at-risk sample candidates with distinct dominant key drivers
+ * Distribution: 2 from Training, 1 each from Onboarding, Counselling, Enrollment
+ *
+ * Risk score weights (total 100):
+ * - Attendance: 25 pts | Distance: 15 pts | First Gen: 10 pts
+ * - Connectivity: 20 pts | Engagement: 10 pts | Contact: 10 pts | Quiz: 10 pts
+ */
+function createAtRiskSampleCandidates(): StudentExtended[] {
+  // Helper to create risk factors object
+  const createRiskFactors = (factors: RiskFactors): { riskFactors: RiskFactors; riskScore: ReturnType<typeof calculateRiskScore> } => ({
+    riskFactors: factors,
+    riskScore: calculateRiskScore(factors),
+  });
+
+  const sampleCandidates: StudentExtended[] = [
+    // Candidate 1: DISTANCE FROM CENTRE dominant (Student Onboarding)
+    // Only this candidate should show "Far from centre" indicator
+    {
+      id: 'STU0001',
+      name: 'Priya Sharma',
+      age: '19',
+      gender: 'Female',
+      contact_phone: '+91 98765 43210',
+      contact_email: 'priya.sharma@email.com',
+      education_level: '12th Pass',
+      status: 'Onboarding',
+      skills: 'Communication, English Speaking',
+      aspirations: 'IT Professional',
+      enrolled_date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+      counsellor_id: 'CNSL001',
+      pipelineStage: 'Student Onboarding',
+      ...createRiskFactors({
+        firstWeekAttendance: 52,          // Just above 50% (~12 pts)
+        distanceFromCentreKm: 42,         // DOMINANT: Very far from centre (~15 pts)
+        isFirstGenGraduate: true,         // +10 pts
+        hasInternet: false,               // +10 pts
+        hasMobile: true,
+        mobileType: 'basic',              // +5 pts
+        loginAttempts: 3,                 // Low (~7 pts)
+        counsellorContactAttempts: 2,     // Moderate (~4 pts)
+        quizScore: 45,                    // Above threshold (~0 pts)
+      }),
+      lastLoginDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      lastCounsellorContact: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      centreId: 'CTR002',
+      centreName: 'Magic Bus Centre - Thane',
+    },
+
+    // Candidate 2: NO MOBILE & INTERNET dominant (Counselling)
+    // Distance is low - should NOT show "Far from centre"
+    {
+      id: 'STU0002',
+      name: 'Rajesh Kumar',
+      age: '21',
+      gender: 'Male',
+      contact_phone: '+91 87654 32109',
+      contact_email: 'rajesh.kumar@email.com',
+      education_level: '10th Pass',
+      status: 'Active',
+      skills: 'Mathematics, Problem Solving',
+      aspirations: 'Government Job',
+      enrolled_date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+      counsellor_id: 'CNSL002',
+      pipelineStage: 'Counselling',
+      ...createRiskFactors({
+        firstWeekAttendance: 55,          // Above 50% (~11 pts)
+        distanceFromCentreKm: 8,          // Close - NO "far" indicator (~4 pts)
+        isFirstGenGraduate: true,         // +10 pts
+        hasInternet: false,               // DOMINANT: No internet (+10 pts)
+        hasMobile: false,                 // DOMINANT: No mobile (+10 pts)
+        mobileType: '',
+        loginAttempts: 1,                 // Very low due to no connectivity (~9 pts)
+        counsellorContactAttempts: 3,     // Moderate (~6 pts)
+        quizScore: 42,                    // Above threshold (~0 pts)
+      }),
+      lastLoginDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+      lastCounsellorContact: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      centreId: 'CTR001',
+      centreName: 'Magic Bus Centre - Andheri',
+    },
+
+    // Candidate 3: LOW FIRST WEEK ATTENDANCE dominant (Training)
+    // Distance is moderate - should NOT show "Far from centre"
+    {
+      id: 'STU0003',
+      name: 'Meera Patel',
+      age: '20',
+      gender: 'Female',
+      contact_phone: '+91 76543 21098',
+      contact_email: 'meera.patel@email.com',
+      education_level: 'ITI/Diploma',
+      status: 'Active',
+      skills: 'Computer Basics, MS Office, Data Entry',
+      aspirations: 'Banking Professional',
+      enrolled_date: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
+      counsellor_id: 'CNSL001',
+      pipelineStage: 'Training',
+      ...createRiskFactors({
+        firstWeekAttendance: 15,          // DOMINANT: Very low attendance (~21 pts)
+        distanceFromCentreKm: 6,          // Close - NO "far" indicator (~3 pts)
+        isFirstGenGraduate: true,         // +10 pts
+        hasInternet: false,               // +10 pts
+        hasMobile: true,
+        mobileType: 'smartphone',         // +0 pts
+        loginAttempts: 4,                 // Low (~6 pts)
+        counsellorContactAttempts: 3,     // Moderate (~6 pts)
+        quizScore: 48,                    // Above threshold (~0 pts)
+      }),
+      lastLoginDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      lastCounsellorContact: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      centreId: 'CTR001',
+      centreName: 'Magic Bus Centre - Andheri',
+    },
+
+    // Candidate 4: POOR QUIZ SCORES dominant (Enrollment)
+    // Distance is moderate - should NOT show "Far from centre"
+    {
+      id: 'STU0004',
+      name: 'Amit Singh',
+      age: '22',
+      gender: 'Male',
+      contact_phone: '+91 65432 10987',
+      contact_email: 'amit.singh@email.com',
+      education_level: 'Graduate',
+      status: 'Active',
+      skills: 'Team Work, Customer Service',
+      aspirations: 'Retail Manager',
+      enrolled_date: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
+      counsellor_id: 'CNSL003',
+      pipelineStage: 'Enrollment',
+      ...createRiskFactors({
+        firstWeekAttendance: 58,          // Above 50% (~10 pts)
+        distanceFromCentreKm: 10,         // Close - NO "far" indicator (~5 pts)
+        isFirstGenGraduate: true,         // +10 pts
+        hasInternet: false,               // +10 pts
+        hasMobile: true,
+        mobileType: 'basic',              // +5 pts
+        loginAttempts: 2,                 // Low (~8 pts)
+        counsellorContactAttempts: 3,     // Moderate (~6 pts)
+        quizScore: 12,                    // DOMINANT: Very poor quiz score (~7 pts)
+      }),
+      lastLoginDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      lastCounsellorContact: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+      centreId: 'CTR004',
+      centreName: 'Magic Bus Centre - Pune',
+    },
+
+    // Candidate 5: HIGH COUNSELLOR CONTACT ATTEMPTS - Student Unresponsive (Training)
+    // Distance is moderate - should NOT show "Far from centre"
+    {
+      id: 'STU0005',
+      name: 'Deepa Reddy',
+      age: '19',
+      gender: 'Female',
+      contact_phone: '+91 54321 09876',
+      contact_email: 'deepa.reddy@email.com',
+      education_level: 'Below 10th',
+      status: 'Active',
+      skills: 'Communication, English Speaking, Hospitality',
+      aspirations: 'Hospitality Expert',
+      enrolled_date: new Date(Date.now() - 50 * 24 * 60 * 60 * 1000).toISOString(),
+      counsellor_id: 'CNSL002',
+      pipelineStage: 'Training',
+      ...createRiskFactors({
+        firstWeekAttendance: 55,          // Above 50% (~11 pts)
+        distanceFromCentreKm: 12,         // Moderate - NO "far" indicator (~6 pts)
+        isFirstGenGraduate: true,         // +10 pts
+        hasInternet: false,               // +10 pts
+        hasMobile: true,
+        mobileType: 'basic',              // +5 pts
+        loginAttempts: 2,                 // Low (~8 pts)
+        counsellorContactAttempts: 9,     // DOMINANT: Student unresponsive (~10 pts)
+        quizScore: 42,                    // Above threshold (~0 pts)
+      }),
+      lastLoginDate: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
+      lastCounsellorContact: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      centreId: 'CTR005',
+      centreName: 'Magic Bus Centre - Bangalore',
+    },
+  ];
+
+  return sampleCandidates;
+}
+
 // Pre-generated mock data for consistent usage
 let cachedStudents: StudentExtended[] | null = null;
 let cachedAlerts: StudentAlert[] | null = null;
 
 export function getMockStudents(): StudentExtended[] {
   if (!cachedStudents) {
-    cachedStudents = generateMockStudents(60);
+    // Start with 5 hardcoded at-risk sample candidates
+    const atRiskSamples = createAtRiskSampleCandidates();
+    // Generate additional random students (starting from index 5 to avoid ID conflicts)
+    const randomStudents = Array.from({ length: 55 }, (_, i) => generateMockStudent(i + 5));
+    cachedStudents = [...atRiskSamples, ...randomStudents];
   }
   return cachedStudents;
 }

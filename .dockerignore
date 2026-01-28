@@ -61,3 +61,6 @@ coverage
 
 # Claude
 .claude
+
+# Windows reserved files
+nul

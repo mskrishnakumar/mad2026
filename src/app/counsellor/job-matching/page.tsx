@@ -106,7 +106,7 @@ export default function JobMatchingPage() {
                 >
                   <div>
                     <p className="font-medium">{student.name}</p>
-                    <p className="text-sm text-muted-foreground">{student.id} • {student.school}</p>
+                    <p className="text-sm text-muted-foreground">{student.id} • {student.education_level}</p>
                   </div>
                   <div className="flex gap-1">
                     {student.skills.slice(0, 2).map((skill) => (
@@ -130,7 +130,7 @@ export default function JobMatchingPage() {
               </div>
               <div className="flex-1">
                 <h3 className="text-lg font-semibold">{selectedStudent.name}</h3>
-                <p className="text-sm text-muted-foreground">{selectedStudent.id} • {selectedStudent.school} • {selectedStudent.grade}</p>
+                <p className="text-sm text-muted-foreground">{selectedStudent.id} • {selectedStudent.education_level}</p>
                 <div className="flex flex-wrap gap-2 mt-3">
                   {selectedStudent.skills.map((skill) => (
                     <Badge key={skill} className="bg-purple-100 text-purple-700 hover:bg-purple-200">{skill}</Badge>

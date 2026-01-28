@@ -19,8 +19,6 @@ interface FormData {
   email: string;
   address: string;
   // Education
-  school: string;
-  grade: string;
   educationLevel: string;
   academicPerformance: string;
   // Skills
@@ -38,8 +36,6 @@ const initialFormData: FormData = {
   phone: '',
   email: '',
   address: '',
-  school: '',
-  grade: '',
   educationLevel: '',
   academicPerformance: '',
   skills: [],
@@ -64,7 +60,7 @@ const careerOptions = [
 
 const steps = [
   { id: 1, title: 'Basic Info', description: 'Name, age, contact details', icon: User },
-  { id: 2, title: 'Education', description: 'School, grade, academic history', icon: GraduationCap },
+  { id: 2, title: 'Education', description: 'Qualification and academic history', icon: GraduationCap },
   { id: 3, title: 'Skills', description: 'Skills assessment', icon: Wrench },
   { id: 4, title: 'Aspirations', description: 'Career interests and goals', icon: Target },
   { id: 5, title: 'Review', description: 'Review and submit', icon: ClipboardCheck },
@@ -108,8 +104,6 @@ export default function NewOnboardingPage() {
         name: `${formData.firstName} ${formData.lastName}`.trim(),
         age: formData.age,
         gender: formData.gender,
-        school: formData.school,
-        grade: formData.grade,
         contact_phone: formData.phone,
         contact_email: formData.email,
         education_level: formData.educationLevel,
@@ -268,44 +262,23 @@ export default function NewOnboardingPage() {
           {/* Step 2: Education */}
           {currentStep === 2 && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="md:col-span-2">
-                <label className="text-sm font-medium mb-1 block">School Name *</label>
-                <Input
-                  placeholder="Enter school name"
-                  value={formData.school}
-                  onChange={(e) => updateField('school', e.target.value)}
-                />
-              </div>
               <div>
-                <label className="text-sm font-medium mb-1 block">Current Grade *</label>
-                <select
-                  className="w-full h-10 px-3 rounded-md border border-input bg-background"
-                  value={formData.grade}
-                  onChange={(e) => updateField('grade', e.target.value)}
-                >
-                  <option value="">Select grade</option>
-                  <option value="8th">8th Standard</option>
-                  <option value="9th">9th Standard</option>
-                  <option value="10th">10th Standard</option>
-                  <option value="11th">11th Standard</option>
-                  <option value="12th">12th Standard</option>
-                  <option value="Graduate">Graduate</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-1 block">Education Level *</label>
+                <label className="text-sm font-medium mb-1 block">Qualification *</label>
                 <select
                   className="w-full h-10 px-3 rounded-md border border-input bg-background"
                   value={formData.educationLevel}
                   onChange={(e) => updateField('educationLevel', e.target.value)}
                 >
-                  <option value="">Select level</option>
-                  <option value="Secondary">Secondary (8th-10th)</option>
-                  <option value="Higher Secondary">Higher Secondary (11th-12th)</option>
+                  <option value="">Select qualification</option>
+                  <option value="Below 10th">Below 10th</option>
+                  <option value="10th Pass">10th Pass</option>
+                  <option value="12th Pass">12th Pass</option>
+                  <option value="ITI/Diploma">ITI/Diploma</option>
                   <option value="Graduate">Graduate</option>
+                  <option value="Post Graduate">Post Graduate</option>
                 </select>
               </div>
-              <div className="md:col-span-2">
+              <div>
                 <label className="text-sm font-medium mb-1 block">Academic Performance</label>
                 <select
                   className="w-full h-10 px-3 rounded-md border border-input bg-background"
@@ -407,9 +380,7 @@ export default function NewOnboardingPage() {
               <div className="bg-gray-50 rounded-lg p-4">
                 <h4 className="font-medium text-gray-900 mb-3">Education</h4>
                 <div className="grid grid-cols-2 gap-2 text-sm">
-                  <p><span className="text-muted-foreground">School:</span> {formData.school || '-'}</p>
-                  <p><span className="text-muted-foreground">Grade:</span> {formData.grade || '-'}</p>
-                  <p><span className="text-muted-foreground">Level:</span> {formData.educationLevel || '-'}</p>
+                  <p><span className="text-muted-foreground">Qualification:</span> {formData.educationLevel || '-'}</p>
                   <p><span className="text-muted-foreground">Performance:</span> {formData.academicPerformance || '-'}</p>
                 </div>
               </div>

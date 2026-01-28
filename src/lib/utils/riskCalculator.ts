@@ -6,9 +6,10 @@ export const WEIGHTS = {
   ATTENDANCE: 25,        // First week attendance - strongest predictor
   CONNECTIVITY: 20,      // Internet + Mobile access - digital divide
   DISTANCE: 15,          // Distance from center - geographic barriers
-  FIRST_GEN: 15,         // First generation graduate - family support gaps
-  ENGAGEMENT: 15,        // Login attempts - digital engagement
-  CONTACT: 10,           // Counsellor contact attempts - reachability
+  FIRST_GEN: 10,         // First generation graduate - family support gaps
+  ENGAGEMENT: 10,        // Login attempts - digital engagement
+  CONTACT: 10,           // Counsellor contact attempts - student unresponsive
+  QUIZ: 10,              // Quiz score - academic performance indicator
 } as const;
 
 // Risk thresholds for categorization
@@ -20,7 +21,8 @@ export const THRESHOLDS = {
   HIGH_RISK_SCORE: 70,   // Alert threshold
   MAX_DISTANCE_KM: 30,   // Distance beyond which max risk applies
   MIN_LOGINS_EXPECTED: 10,  // Expected logins per 30 days
-  MAX_CONTACT_ATTEMPTS: 5,  // Contact attempts before max concern
+  MAX_CONTACT_ATTEMPTS: 5,  // Contact attempts before max concern (student unresponsive)
+  LOW_QUIZ_SCORE: 40,    // Quiz score below this = high risk
 } as const;
 
 /**
@@ -63,22 +65,28 @@ function calculateBreakdown(factors: RiskFactors): RiskScoreBreakdown {
       WEIGHTS.DISTANCE * Math.min(factors.distanceFromCentreKm / THRESHOLDS.MAX_DISTANCE_KM, 1)
     ),
 
-    // First Generation: yes = 15 points, no = 0 points
+    // First Generation: yes = 10 points, no = 0 points
     firstGenRisk: factors.isFirstGenGraduate ? WEIGHTS.FIRST_GEN : 0,
 
     // Connectivity: Combined internet + mobile scoring (max 20 points)
     connectivityRisk: calculateConnectivityRisk(factors),
 
     // Engagement: fewer logins = higher risk
-    // 0 logins = 15 points, 10+ logins = 0 points
+    // 0 logins = 10 points, 10+ logins = 0 points
     engagementRisk: Math.round(
       WEIGHTS.ENGAGEMENT * Math.max(0, 1 - factors.loginAttempts / THRESHOLDS.MIN_LOGINS_EXPECTED)
     ),
 
-    // Contact attempts: more attempts needed = higher risk
+    // Contact attempts: more attempts needed = higher risk (student unresponsive)
     // 0 attempts = 0 points (easily reachable), 5+ attempts = 10 points
     contactRisk: Math.round(
       WEIGHTS.CONTACT * Math.min(factors.counsellorContactAttempts / THRESHOLDS.MAX_CONTACT_ATTEMPTS, 1)
+    ),
+
+    // Quiz score: below 40% = high risk, linear scale from 0-40%
+    // 0% quiz = 10 points, 40%+ quiz = 0 points
+    quizRisk: Math.round(
+      WEIGHTS.QUIZ * Math.max(0, 1 - factors.quizScore / THRESHOLDS.LOW_QUIZ_SCORE)
     ),
   };
 }

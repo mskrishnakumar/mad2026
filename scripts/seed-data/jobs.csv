@@ -1,0 +1,11 @@
+id,title,company,location,industry,job_type,required_skills,education_level,salary_min,salary_max,openings,posted_date,status
+"JOB001","Retail Sales Executive","Reliance Retail","Chennai","Retail","Full-time","Communication, Customer Service, Retail Skills","10th Pass","12000","18000","15","2026-01-21T21:27:30.714Z","Active"
+"JOB002","IT Support Associate","Wipro","Chennai","IT","Full-time","Computer Basics, Problem Solving, Communication","12th Pass","15000","22000","10","2026-01-23T21:27:30.715Z","Active"
+"JOB003","Hospital Attendant","Apollo Hospitals","Chennai","Healthcare","Full-time","Healthcare Basics, Communication, Team Work","12th Pass","14000","20000","8","2026-01-18T21:27:30.715Z","Active"
+"JOB004","Front Desk Executive","Taj Hotels","Chennai","Hospitality","Full-time","Hospitality, Communication, English Speaking","12th Pass","16000","24000","5","2026-01-25T21:27:30.715Z","Active"
+"JOB005","Data Entry Operator","TCS","Chennai","IT","Full-time","Data Entry, MS Office, Computer Basics","10th Pass","10000","15000","20","2026-01-26T21:27:30.715Z","Active"
+"JOB006","Bank Teller","HDFC Bank","Chennai","Banking","Full-time","Mathematics, Communication, Customer Service","Graduate","18000","28000","6","2026-01-20T21:27:30.715Z","Active"
+"JOB007","Electrician","L&T Construction","Chennai","Construction","Full-time","Electrical Basics, Problem Solving, Team Work","ITI/Diploma","15000","22000","12","2026-01-22T21:27:30.715Z","Active"
+"JOB008","Customer Care Executive","Amazon","Chennai","BPO","Full-time","Communication, English Speaking, Customer Service","12th Pass","14000","20000","25","2026-01-27T21:27:30.715Z","Active"
+"JOB009","Automobile Technician","Maruti Suzuki","Chennai","Automotive","Full-time","Mechanical Skills, Problem Solving, Team Work","ITI/Diploma","13000","19000","8","2026-01-16T21:27:30.715Z","Active"
+"JOB010","Digital Marketing Intern","Zoho","Chennai","IT","Internship","Computer Basics, Communication, English Speaking","Graduate","12000","18000","4","2026-01-24T21:27:30.715Z","Active"

@@ -1,0 +1,47 @@
+[
+  {
+    "id": "CNSL001",
+    "name": "Dr. Priya Krishnan",
+    "email": "priya.krishnan@magicbus.org",
+    "phone": "+91 9876543210",
+    "centreId": "CTR001",
+    "centreName": "Magic Bus Porur Centre",
+    "assignedStudents": 12
+  },
+  {
+    "id": "CNSL002",
+    "name": "Rajesh Venkataraman",
+    "email": "rajesh.v@magicbus.org",
+    "phone": "+91 9876543211",
+    "centreId": "CTR002",
+    "centreName": "Magic Bus Ramapuram Centre",
+    "assignedStudents": 10
+  },
+  {
+    "id": "CNSL003",
+    "name": "Meena Sundaram",
+    "email": "meena.s@magicbus.org",
+    "phone": "+91 9876543212",
+    "centreId": "CTR003",
+    "centreName": "Magic Bus Valasaravakkam Centre",
+    "assignedStudents": 8
+  },
+  {
+    "id": "CNSL004",
+    "name": "Arun Kumar",
+    "email": "arun.k@magicbus.org",
+    "phone": "+91 9876543213",
+    "centreId": "CTR004",
+    "centreName": "Magic Bus Maduravoyal Centre",
+    "assignedStudents": 15
+  },
+  {
+    "id": "CNSL005",
+    "name": "Lakshmi Narayanan",
+    "email": "lakshmi.n@magicbus.org",
+    "phone": "+91 9876543214",
+    "centreId": "CTR005",
+    "centreName": "Magic Bus Mangadu Centre",
+    "assignedStudents": 6
+  }
+]

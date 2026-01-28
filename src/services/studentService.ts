@@ -40,6 +40,6 @@ export async function searchStudents(query: string): Promise<StudentParsed[]> {
   return students.filter(s =>
     s.name.toLowerCase().includes(lowerQuery) ||
     s.id.toLowerCase().includes(lowerQuery) ||
-    s.school.toLowerCase().includes(lowerQuery)
+    s.education_level.toLowerCase().includes(lowerQuery)
   );
 }

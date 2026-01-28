@@ -9,8 +9,6 @@ function entityToStudent(entity: StudentEntity): StudentParsed {
     name: entity.name,
     age: entity.age.toString(),
     gender: entity.gender,
-    school: entity.school,
-    grade: entity.grade,
     contact_phone: entity.contactPhone,
     contact_email: entity.contactEmail,
     education_level: entity.educationLevel,
@@ -29,8 +27,6 @@ function studentToEntity(student: Partial<StudentParsed> & { id: string }): Stud
     name: student.name || '',
     age: parseInt(student.age || '0') || 0,
     gender: student.gender || '',
-    school: student.school || '',
-    grade: student.grade || '',
     contactPhone: student.contact_phone || '',
     contactEmail: student.contact_email || '',
     educationLevel: student.education_level || '',
@@ -117,7 +113,7 @@ export async function searchStudents(query: string): Promise<StudentParsed[]> {
   return students.filter(s =>
     s.name.toLowerCase().includes(lowerQuery) ||
     s.id.toLowerCase().includes(lowerQuery) ||
-    s.school.toLowerCase().includes(lowerQuery)
+    s.education_level.toLowerCase().includes(lowerQuery)
   );
 }
 

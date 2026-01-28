@@ -1,0 +1,153 @@
+{
+  "centres": [
+    {
+      "id": "CTR001",
+      "name": "Magic Bus Porur Centre",
+      "address": "123 Mount Poonamallee Road, Porur, Chennai 600116",
+      "latitude": 13.0382,
+      "longitude": 80.1565,
+      "pinCodes": [
+        "600116",
+        "600095",
+        "600089"
+      ],
+      "capacity": 100,
+      "currentEnrollment": 75
+    },
+    {
+      "id": "CTR002",
+      "name": "Magic Bus Ramapuram Centre",
+      "address": "45 Arcot Road, Ramapuram, Chennai 600089",
+      "latitude": 13.031,
+      "longitude": 80.181,
+      "pinCodes": [
+        "600089",
+        "600026",
+        "600095"
+      ],
+      "capacity": 80,
+      "currentEnrollment": 45
+    },
+    {
+      "id": "CTR003",
+      "name": "Magic Bus Valasaravakkam Centre",
+      "address": "78 100 Feet Road, Valasaravakkam, Chennai 600087",
+      "latitude": 13.047,
+      "longitude": 80.172,
+      "pinCodes": [
+        "600087",
+        "600095",
+        "600116"
+      ],
+      "capacity": 60,
+      "currentEnrollment": 40
+    },
+    {
+      "id": "CTR004",
+      "name": "Magic Bus Maduravoyal Centre",
+      "address": "200 Poonamallee High Road, Maduravoyal, Chennai 600095",
+      "latitude": 13.057,
+      "longitude": 80.165,
+      "pinCodes": [
+        "600095",
+        "600116",
+        "600077"
+      ],
+      "capacity": 90,
+      "currentEnrollment": 60
+    },
+    {
+      "id": "CTR005",
+      "name": "Magic Bus Mangadu Centre",
+      "address": "55 Trunk Road, Mangadu, Chennai 600122",
+      "latitude": 13.026,
+      "longitude": 80.12,
+      "pinCodes": [
+        "600122",
+        "600069",
+        "600123"
+      ],
+      "capacity": 50,
+      "currentEnrollment": 30
+    }
+  ],
+  "incomeBrackets": [
+    {
+      "value": "less_1_lakh",
+      "label": "< ₹1 Lakh",
+      "eligible": true
+    },
+    {
+      "value": "1_2_lakhs",
+      "label": "₹1 - 2 Lakhs",
+      "eligible": true
+    },
+    {
+      "value": "2_3_lakhs",
+      "label": "₹2 - 3 Lakhs",
+      "eligible": true
+    },
+    {
+      "value": "3_3.5_lakhs",
+      "label": "₹3 - 3.5 Lakhs",
+      "eligible": true
+    },
+    {
+      "value": "above_3.5_lakhs",
+      "label": "> ₹3.5 Lakhs",
+      "eligible": false
+    }
+  ],
+  "educationLevels": [
+    "Below 10th",
+    "10th Pass",
+    "12th Pass",
+    "ITI/Diploma",
+    "Graduate",
+    "Post Graduate"
+  ],
+  "genderOptions": [
+    "Male",
+    "Female",
+    "Other",
+    "Prefer not to say"
+  ],
+  "pinCoordinates": {
+    "600026": {
+      "lat": 13.025,
+      "lng": 80.2
+    },
+    "600069": {
+      "lat": 13.01,
+      "lng": 80.11
+    },
+    "600077": {
+      "lat": 13.07,
+      "lng": 80.18
+    },
+    "600087": {
+      "lat": 13.047,
+      "lng": 80.172
+    },
+    "600089": {
+      "lat": 13.031,
+      "lng": 80.181
+    },
+    "600095": {
+      "lat": 13.057,
+      "lng": 80.165
+    },
+    "600116": {
+      "lat": 13.0382,
+      "lng": 80.1565
+    },
+    "600122": {
+      "lat": 13.026,
+      "lng": 80.12
+    },
+    "600123": {
+      "lat": 13.015,
+      "lng": 80.105
+    }
+  }
+}

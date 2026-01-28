@@ -94,23 +94,43 @@ export function AtRiskStudentsPanel() {
 function AtRiskStudentCard({ student }: { student: StudentExtended }) {
   const { riskFactors, riskScore } = student;
 
-  // Identify top risk factors
+  // Identify top risk factors with priority ordering
   const riskIndicators = [];
 
-  if (riskFactors.firstWeekAttendance < 50) {
-    riskIndicators.push({ icon: '📅', label: 'Low attendance' });
-  }
+  // Distance from centre - geographic barrier
   if (riskFactors.distanceFromCentreKm > 20) {
-    riskIndicators.push({ icon: '📍', label: 'Far from centre' });
+    riskIndicators.push({ icon: '📍', label: `Far from centre (${riskFactors.distanceFromCentreKm}km)` });
   }
-  if (!riskFactors.hasInternet) {
-    riskIndicators.push({ icon: '📶', label: 'No internet' });
+
+  // No mobile & internet - connectivity barrier
+  if (!riskFactors.hasInternet && !riskFactors.hasMobile) {
+    riskIndicators.push({ icon: '📵', label: 'No mobile & internet' });
+  } else if (!riskFactors.hasInternet) {
+    riskIndicators.push({ icon: '📶', label: 'No internet access' });
+  } else if (!riskFactors.hasMobile) {
+    riskIndicators.push({ icon: '📱', label: 'No mobile access' });
+  } else if (riskFactors.mobileType === 'basic') {
+    riskIndicators.push({ icon: '📱', label: 'Basic phone only' });
   }
-  if (!riskFactors.hasMobile || riskFactors.mobileType === 'basic') {
-    riskIndicators.push({ icon: '📱', label: 'Limited mobile' });
+
+  // Low first week attendance
+  if (riskFactors.firstWeekAttendance < 50) {
+    riskIndicators.push({ icon: '📅', label: `Low attendance (${riskFactors.firstWeekAttendance}%)` });
   }
+
+  // Poor quiz scores (below 40%)
+  if (riskFactors.quizScore < 40) {
+    riskIndicators.push({ icon: '📝', label: `Poor quiz score (${riskFactors.quizScore}%)` });
+  }
+
+  // High counsellor contact attempts - student unresponsive
+  if (riskFactors.counsellorContactAttempts >= 4) {
+    riskIndicators.push({ icon: '📞', label: `Unresponsive (${riskFactors.counsellorContactAttempts} contact attempts)` });
+  }
+
+  // Low engagement (login attempts)
   if (riskFactors.loginAttempts < 3) {
-    riskIndicators.push({ icon: '🔐', label: 'Low engagement' });
+    riskIndicators.push({ icon: '🔐', label: 'Low platform engagement' });
   }
 
   return (
@@ -155,13 +175,16 @@ function AtRiskStudentCard({ student }: { student: StudentExtended }) {
       </div>
 
       {/* Quick Stats */}
-      <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-3 text-xs text-gray-500">
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 pt-3 text-xs text-gray-500">
         <div className="flex items-center gap-1">
           <MapPin className="h-3 w-3" />
           <span>{riskFactors.distanceFromCentreKm}km</span>
         </div>
         <div className="flex items-center gap-1">
-          <span>{riskFactors.firstWeekAttendance}% attendance</span>
+          <span>{riskFactors.firstWeekAttendance}% att.</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span>{riskFactors.quizScore}% quiz</span>
         </div>
       </div>
     </a>
