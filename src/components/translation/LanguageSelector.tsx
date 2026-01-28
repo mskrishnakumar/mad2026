@@ -8,6 +8,7 @@ const LANGUAGES = [
   { code: 'te', name: 'Telugu', nativeName: 'తెలుగు' },
   { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी' },
   { code: 'ta', name: 'Tamil', nativeName: 'தமிழ்' },
+  { code: 'mr', name: 'Marathi', nativeName: 'मराठी' },
 ];
 
 interface LanguageSelectorProps {
