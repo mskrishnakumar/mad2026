@@ -287,7 +287,7 @@ export default function StudentRegistrationPage() {
       case 2:
         return !!(formData.annualFamilyIncome && formData.currentlyEmployedOrTraining && isEligible);
       case 3:
-        return !!(formData.aadhaarFile && docValidation.aadhaar.status === 'success');
+        return !!(formData.aadhaarNumber && docValidation.aadhaar.status === 'success');
       case 4:
         return !!formData.selectedCentreId;
       default:
