@@ -8,7 +8,7 @@ import { FileUpload } from '@/components/ui/FileUpload';
 import { CentreMap } from '@/components/map/CentreMap';
 import {
   ArrowLeft, ArrowRight, Check, User, IndianRupee, FileText, MapPin,
-  CheckCircle, AlertTriangle, Loader2, Home
+  CheckCircle, AlertTriangle, Loader2, Home, Mic, MicOff
 } from 'lucide-react';
 import Link from 'next/link';
 import {
@@ -33,8 +33,12 @@ interface FormData {
   preferredCommunication: string;
   // Referral source
   referralSource: string;
+  // Additional questions
+  firstGenerationGraduate: string;
+  careerAspirations: string;
   // Step 2: Eligibility
   annualFamilyIncome: string;
+  currentlyEmployedOrTraining: string;
   // Step 3: Documents
   aadhaarFile: File | null;
   bplFile: File | null;
@@ -58,7 +62,10 @@ const initialFormData: FormData = {
   mobileType: '',
   preferredCommunication: '',
   referralSource: '',
+  firstGenerationGraduate: '',
+  careerAspirations: '',
   annualFamilyIncome: '',
+  currentlyEmployedOrTraining: '',
   aadhaarFile: null,
   bplFile: null,
   rationFile: null,
@@ -116,13 +123,79 @@ export default function StudentRegistrationPage() {
     ration: { status: 'idle' },
   });
 
+  // Voice recording state
+  const [isRecording, setIsRecording] = useState(false);
+
   function updateField<K extends keyof FormData>(field: K, value: FormData[K]) {
     setFormData(prev => ({ ...prev, [field]: value }));
   }
 
+  // Calculate age from date of birth
+  function calculateAge(dateOfBirth: string): number | null {
+    if (!dateOfBirth) return null;
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  }
+
+  // Check age eligibility (18-25 years)
+  const candidateAge = calculateAge(formData.dateOfBirth);
+  const isAgeEligible = candidateAge !== null ? (candidateAge >= 18 && candidateAge <= 25) : true;
+
+  // Check employment/training eligibility
+  const isEmploymentEligible = formData.currentlyEmployedOrTraining !== 'yes';
+
+  // Voice search for career aspirations
+  function startVoiceRecording() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const windowWithSpeech = window as any;
+
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert('Voice recognition is not supported in your browser. Please use Chrome or Edge.');
+      return;
+    }
+
+    const SpeechRecognition = windowWithSpeech.SpeechRecognition || windowWithSpeech.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) return;
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-IN';
+
+    recognition.onstart = () => {
+      setIsRecording(true);
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      updateField('careerAspirations', formData.careerAspirations + (formData.careerAspirations ? ' ' : '') + transcript);
+    };
+
+    recognition.onerror = () => {
+      setIsRecording(false);
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+
+    recognition.start();
+  }
+
   // Check eligibility based on income
   const selectedIncome = INCOME_BRACKETS.find(b => b.value === formData.annualFamilyIncome);
-  const isEligible = selectedIncome ? selectedIncome.eligible : true;
+  const isIncomeEligible = selectedIncome ? selectedIncome.eligible : true;
+
+  // Overall eligibility (all criteria must be met)
+  const isEligible = isIncomeEligible && isAgeEligible && isEmploymentEligible;
 
   // Find nearest centre based on PIN code
   const nearestCentre = formData.pinCode ? findNearestCentre(formData.pinCode) : null;
@@ -195,10 +268,12 @@ export default function StudentRegistrationPage() {
           formData.hasInternet &&
           formData.hasMobile &&
           mobileValid &&
-          formData.referralSource
+          formData.referralSource &&
+          formData.firstGenerationGraduate &&
+          formData.careerAspirations
         );
       case 2:
-        return !!(formData.annualFamilyIncome && isEligible);
+        return !!(formData.annualFamilyIncome && formData.currentlyEmployedOrTraining && isEligible);
       case 3:
         return !!(formData.aadhaarFile && docValidation.aadhaar.status === 'success');
       case 4:
@@ -227,7 +302,10 @@ export default function StudentRegistrationPage() {
         mobileType: formData.mobileType,
         preferredCommunication: formData.preferredCommunication,
         referralSource: formData.referralSource,
+        firstGenerationGraduate: formData.firstGenerationGraduate === 'yes',
+        careerAspirations: formData.careerAspirations,
         annualFamilyIncome: formData.annualFamilyIncome,
+        currentlyEmployedOrTraining: formData.currentlyEmployedOrTraining === 'yes',
         selectedCentreId: formData.selectedCentreId,
         selectedCentreName: formData.selectedCentreName,
         aadhaarUploaded: !!formData.aadhaarFile,
@@ -572,12 +650,71 @@ export default function StudentRegistrationPage() {
                     ))}
                   </select>
                 </div>
+
+                {/* First Generation Graduate Question */}
+                <div className="border-t pt-4 mt-4">
+                  <label className="text-sm font-medium mb-1 block">Are you a first generation graduate in your family? *</label>
+                  <p className="text-xs text-muted-foreground mb-2">First generation graduate means you will be the first person in your immediate family to complete a degree or diploma.</p>
+                  <select
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                    value={formData.firstGenerationGraduate}
+                    onChange={(e) => updateField('firstGenerationGraduate', e.target.value)}
+                  >
+                    <option value="">Select</option>
+                    <option value="yes">Yes, I will be the first graduate in my family</option>
+                    <option value="no">No, someone in my family has graduated</option>
+                  </select>
+                </div>
+
+                {/* Career Aspirations */}
+                <div className="border-t pt-4 mt-4">
+                  <label className="text-sm font-medium mb-1 block">Career Aspirations *</label>
+                  <p className="text-xs text-muted-foreground mb-2">Tell us about your career goals and what you hope to achieve through this programme.</p>
+                  <div className="relative">
+                    <textarea
+                      className="w-full min-h-[100px] px-3 py-2 rounded-md border border-input bg-background resize-y pr-12"
+                      placeholder="Describe your career aspirations, goals, and what you hope to learn..."
+                      value={formData.careerAspirations}
+                      onChange={(e) => updateField('careerAspirations', e.target.value)}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className={`absolute right-2 top-2 p-2 h-8 w-8 ${isRecording ? 'bg-red-100 border-red-300 text-red-600' : ''}`}
+                      onClick={startVoiceRecording}
+                      title={isRecording ? 'Recording...' : 'Click to speak'}
+                    >
+                      {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  {isRecording && (
+                    <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                      <span className="inline-block w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                      Listening... Speak now
+                    </p>
+                  )}
+                </div>
               </div>
             )}
 
             {/* Step 2: Eligibility */}
             {currentStep === 2 && (
               <div className="space-y-6">
+                {/* Age Eligibility Check */}
+                {formData.dateOfBirth && !isAgeEligible && (
+                  <div className="p-4 rounded-xl bg-red-50 border border-red-200">
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle className="h-5 w-5 text-red-600" />
+                      <span className="font-medium text-red-700">Age Requirement Not Met</span>
+                    </div>
+                    <p className="text-sm text-red-600 mt-2">
+                      We're sorry, the Upskilling Programme is available for candidates between 18 and 25 years of age.
+                      Your current age is {candidateAge} years. Please contact your nearest Magic Bus centre for other opportunities.
+                    </p>
+                  </div>
+                )}
+
                 <div>
                   <label className="text-sm font-medium mb-1 block">Annual Family Income *</label>
                   <select
@@ -594,27 +731,53 @@ export default function StudentRegistrationPage() {
                   </select>
                 </div>
 
-                {formData.annualFamilyIncome && (
-                  <div className={`p-4 rounded-xl ${isEligible ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+                {formData.annualFamilyIncome && !isIncomeEligible && (
+                  <div className="p-4 rounded-xl bg-red-50 border border-red-200">
                     <div className="flex items-center gap-2">
-                      {isEligible ? (
-                        <>
-                          <CheckCircle className="h-5 w-5 text-green-600" />
-                          <span className="font-medium text-green-700">You are eligible for the Upskilling Programme!</span>
-                        </>
-                      ) : (
-                        <>
-                          <AlertTriangle className="h-5 w-5 text-red-600" />
-                          <span className="font-medium text-red-700">Not Eligible</span>
-                        </>
-                      )}
+                      <AlertTriangle className="h-5 w-5 text-red-600" />
+                      <span className="font-medium text-red-700">Income Requirement Not Met</span>
                     </div>
-                    {!isEligible && (
-                      <p className="text-sm text-red-600 mt-2">
-                        We're sorry, the Upskilling Programme is currently available for families with annual income below ₹3.5 Lakhs.
-                        Please contact your nearest Magic Bus centre for other opportunities.
-                      </p>
-                    )}
+                    <p className="text-sm text-red-600 mt-2">
+                      We're sorry, the Upskilling Programme is currently available for families with annual income below ₹3.5 Lakhs.
+                      Please contact your nearest Magic Bus centre for other opportunities.
+                    </p>
+                  </div>
+                )}
+
+                {/* Employment/Training Question */}
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Are you currently employed or enrolled in any other training programme? *</label>
+                  <select
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                    value={formData.currentlyEmployedOrTraining}
+                    onChange={(e) => updateField('currentlyEmployedOrTraining', e.target.value)}
+                  >
+                    <option value="">Select</option>
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
+                </div>
+
+                {formData.currentlyEmployedOrTraining === 'yes' && (
+                  <div className="p-4 rounded-xl bg-red-50 border border-red-200">
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle className="h-5 w-5 text-red-600" />
+                      <span className="font-medium text-red-700">Not Eligible</span>
+                    </div>
+                    <p className="text-sm text-red-600 mt-2">
+                      We're sorry, the Upskilling Programme is available only for candidates who are not currently employed or enrolled in other training programmes.
+                      Please contact your nearest Magic Bus centre for other opportunities.
+                    </p>
+                  </div>
+                )}
+
+                {/* Overall Eligibility Status */}
+                {formData.annualFamilyIncome && formData.currentlyEmployedOrTraining && isAgeEligible && isEligible && (
+                  <div className="p-4 rounded-xl bg-green-50 border border-green-200">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                      <span className="font-medium text-green-700">You are eligible for the Upskilling Programme!</span>
+                    </div>
                   </div>
                 )}
               </div>
