@@ -1,0 +1,123 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
+import {
+  LayoutDashboard,
+  UserPlus,
+  Briefcase,
+  GraduationCap,
+  Users,
+  Menu,
+  X,
+} from 'lucide-react';
+import { useState } from 'react';
+
+interface SidebarItem {
+  label: string;
+  href: string;
+  icon: React.ElementType;
+}
+
+const counsellorMenuItems: SidebarItem[] = [
+  { label: 'Dashboard', href: '/counsellor/dashboard', icon: LayoutDashboard },
+  { label: 'Student Onboarding', href: '/counsellor/onboarding', icon: UserPlus },
+  { label: 'Programme Matching', href: '/counsellor/programme-matching', icon: GraduationCap },
+  { label: 'Job Matching', href: '/counsellor/job-matching', icon: Briefcase },
+  { label: 'Students', href: '/counsellor/students', icon: Users },
+];
+
+interface SidebarProps {
+  userType?: 'counsellor' | 'student';
+}
+
+export function Sidebar({ userType = 'counsellor' }: SidebarProps) {
+  const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const menuItems = userType === 'counsellor' ? counsellorMenuItems : [];
+
+  return (
+    <>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="fixed top-4 left-4 z-50 md:hidden p-2 rounded-lg bg-white shadow-md border"
+      >
+        {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+      </button>
+
+      {/* Overlay for mobile */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={cn(
+          'fixed left-0 top-0 z-40 h-screen w-64 bg-white border-r transition-transform duration-300',
+          'md:translate-x-0',
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
+      >
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-3 px-5 py-5 border-b hover:bg-gray-50 transition-colors">
+          {/* MP Logo */}
+          <div className="w-11 h-11 bg-gradient-to-br from-teal-500 via-emerald-500 to-cyan-500 rounded-xl flex items-center justify-center">
+            <span className="text-lg font-black text-white tracking-tight">MP</span>
+          </div>
+          <div>
+            <h1 className="font-bold text-gray-900 leading-tight">Mission</h1>
+            <h1 className="font-bold text-primary leading-tight -mt-1">Possible</h1>
+          </div>
+        </Link>
+
+        {/* Portal Label */}
+        <div className="px-5 py-3 bg-gray-50/80">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            {userType} Portal
+          </p>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 px-4 py-4 space-y-1">
+          {menuItems.map((item) => {
+            const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+            const Icon = item.icon;
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setIsOpen(false)}
+                className={cn(
+                  'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors',
+                  isActive
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                )}
+              >
+                <Icon className="h-5 w-5" />
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Footer - Branding */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t bg-gray-50/50">
+          <p className="text-xs text-center text-muted-foreground">
+            Magic Bus × Barclays
+          </p>
+          <p className="text-xs text-center text-muted-foreground/70">
+            Hack-a-Difference 2026
+          </p>
+        </div>
+      </aside>
+    </>
+  );
+}

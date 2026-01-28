@@ -1,112 +1,59 @@
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+'use client';
+
 import { Container } from '@/components/layout/Container';
-import { MessageSquare, Sparkles, Zap, Palette } from 'lucide-react';
-import Link from 'next/link';
-import { ThemePicker } from '@/components/ThemePicker';
+import { RoleCard } from '@/components/landing/RoleCard';
+import { ClipboardList, GraduationCap } from 'lucide-react';
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <main className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center">
       <Container className="py-16">
         {/* Hero Section */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
-            MAD2026
+        <div className="text-center mb-12">
+          {/* MP Logo */}
+          <div className="flex justify-center mb-6">
+            <div className="w-24 h-24 bg-gradient-to-br from-teal-500 via-emerald-500 to-cyan-500 rounded-2xl shadow-lg flex items-center justify-center">
+              <span className="text-4xl font-black text-white tracking-tight">MP</span>
+            </div>
+          </div>
+
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4 text-gray-900">
+            Mission <span className="text-primary">Possible</span>
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            Your hackathon starter is ready. Edit this page to build something awesome.
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto mb-4">
+            Revolutionizing youth mobilization through Skilling and Job Placements for India's underserved communities
           </p>
-          <div className="flex gap-4 justify-center">
-            <Button size="lg" asChild>
-              <Link href="/chat">Try Chat Demo</Link>
-            </Button>
-            <Button size="lg" variant="outline" asChild>
-              <Link href="/api/health">Check API</Link>
-            </Button>
+        </div>
+
+        {/* Role Selection Cards */}
+        <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto mb-12">
+          <RoleCard
+            title="I'm a Counsellor"
+            description="Onboard students, assess their skills, and match them to the right programmes and job opportunities."
+            icon={ClipboardList}
+            href="/counsellor/dashboard"
+            colorScheme="teal"
+          />
+          <RoleCard
+            title="I'm a Student"
+            description="Discover programmes and job opportunities that match your skills and career aspirations."
+            icon={GraduationCap}
+            href="/student/dashboard"
+            colorScheme="blue"
+          />
+        </div>
+
+        {/* Footer Tagline */}
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground">
+            Transforming lives, one match at a time
+          </p>
+          <div className="flex items-center justify-center gap-2 mt-3">
+            <span className="text-xs text-muted-foreground/70">A Magic Bus Initiative</span>
+            <span className="text-xs text-muted-foreground/50">|</span>
+            <span className="text-xs text-muted-foreground/70">Built by Barclays volunteers for Hack-a-Difference 2026</span>
           </div>
         </div>
-
-        {/* Features Grid */}
-        <div className="grid md:grid-cols-3 gap-6 mb-16">
-          <Card>
-            <CardHeader>
-              <MessageSquare className="h-10 w-10 mb-2 text-primary" />
-              <CardTitle>Chat Ready</CardTitle>
-              <CardDescription>
-                Pre-built chat component with streaming support
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Connect to Azure OpenAI or any LLM provider. RAG pattern included.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <Sparkles className="h-10 w-10 mb-2 text-primary" />
-              <CardTitle>Smart Recommendations</CardTitle>
-              <CardDescription>
-                Hybrid scoring with rule-based + semantic matching
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Personalized results using embeddings and eligibility rules.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <Zap className="h-10 w-10 mb-2 text-primary" />
-              <CardTitle>Quick Mode</CardTitle>
-              <CardDescription>
-                Fast fallback when you need speed over accuracy
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Skip AI calls for instant responses during development.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Color Palette Picker */}
-        <Card className="max-w-2xl mx-auto mb-8">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Palette className="h-5 w-5 text-primary" />
-              <CardTitle>Choose Your Color Palette</CardTitle>
-            </div>
-            <CardDescription>
-              Select a color theme for your project
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ThemePicker />
-          </CardContent>
-        </Card>
-
-        {/* Quick Start */}
-        <Card className="max-w-2xl mx-auto">
-          <CardHeader>
-            <CardTitle>Quick Start</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="rounded-md bg-muted p-4 font-mono text-sm">
-              <p className="text-muted-foreground"># Configure your environment</p>
-              <p>cp .env.example .env.local</p>
-              <p className="text-muted-foreground mt-2"># Edit src/app/page.tsx to customize</p>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Check <code className="bg-muted px-1 rounded">README.md</code> for full documentation.
-            </p>
-          </CardContent>
-        </Card>
       </Container>
     </main>
   );
