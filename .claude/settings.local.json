@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "Bash(winget install:*)",
+      "Bash(gh:*)",
+      "Bash(az:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(git checkout:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm install:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: Add Mission Possible Wave 1 MVP UI\n\n- Landing page with role selection \\(Counsellor/Student\\)\n- Counsellor portal with sidebar navigation\n- Dashboard with stats and quick actions\n- Student onboarding wizard \\(5-step placeholder\\)\n- Programme matching page\n- Job matching page\n- Students list with table view\n- Student portal with header\n- MP logo with teal-emerald-cyan gradient\n- User profile dropdown in header\n- Mobile responsive sidebar\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(timeout /t 10 /nobreak)",
+      "Bash(curl:*)"
+    ]
+  }
+}

@@ -1,11 +1,70 @@
 'use client';
 
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Briefcase } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Search, Briefcase, Loader2, MapPin, Building2, IndianRupee, Users, User } from 'lucide-react';
+import type { StudentParsed } from '@/lib/types/data';
+import type { JobParsed } from '@/lib/types/data';
 
 export default function JobMatchingPage() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [students, setStudents] = useState<StudentParsed[]>([]);
+  const [selectedStudent, setSelectedStudent] = useState<StudentParsed | null>(null);
+  const [jobs, setJobs] = useState<JobParsed[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [loadingMatches, setLoadingMatches] = useState(false);
+
+  async function handleSearch(e: React.FormEvent) {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+
+    setSearching(true);
+    setSelectedStudent(null);
+    setJobs([]);
+
+    try {
+      const response = await fetch(`/api/students?search=${encodeURIComponent(searchQuery)}`);
+      if (response.ok) {
+        const data = await response.json();
+        setStudents(data);
+      }
+    } catch (error) {
+      console.error('Search failed:', error);
+    } finally {
+      setSearching(false);
+    }
+  }
+
+  async function selectStudent(student: StudentParsed) {
+    setSelectedStudent(student);
+    setStudents([]);
+    setLoadingMatches(true);
+
+    try {
+      const skillsParam = student.skills.join(',');
+      const response = await fetch(`/api/jobs?skills=${encodeURIComponent(skillsParam)}`);
+      if (response.ok) {
+        const data = await response.json();
+        setJobs(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch matches:', error);
+    } finally {
+      setLoadingMatches(false);
+    }
+  }
+
+  function calculateMatchScore(job: JobParsed, studentSkills: string[]): number {
+    const matchedSkills = job.required_skills.filter(skill =>
+      studentSkills.some(s => s.toLowerCase().includes(skill.toLowerCase()) ||
+                           skill.toLowerCase().includes(s.toLowerCase()))
+    );
+    return Math.round((matchedSkills.length / job.required_skills.length) * 100);
+  }
+
   return (
     <div className="space-y-8">
       {/* Page Header */}
@@ -21,28 +80,189 @@ export default function JobMatchingPage() {
           <CardDescription>Search for a student to view job recommendations</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
+          <form onSubmit={handleSearch} className="flex gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search by name or student code..." className="pl-10" />
+              <Input
+                placeholder="Search by name or student code..."
+                className="pl-10"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
-            <Button>Search</Button>
-          </div>
+            <Button type="submit" disabled={searching}>
+              {searching ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Search'}
+            </Button>
+          </form>
+
+          {/* Search Results */}
+          {students.length > 0 && (
+            <div className="mt-4 border rounded-lg divide-y">
+              {students.map((student) => (
+                <button
+                  key={student.id}
+                  onClick={() => selectStudent(student)}
+                  className="w-full p-4 text-left hover:bg-muted/50 transition-colors flex items-center justify-between"
+                >
+                  <div>
+                    <p className="font-medium">{student.name}</p>
+                    <p className="text-sm text-muted-foreground">{student.id} • {student.school}</p>
+                  </div>
+                  <div className="flex gap-1">
+                    {student.skills.slice(0, 2).map((skill) => (
+                      <Badge key={skill} variant="secondary" className="text-xs">{skill}</Badge>
+                    ))}
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* Placeholder for Results */}
-      <Card className="border-dashed border-2">
-        <CardContent className="flex flex-col items-center justify-center py-16">
-          <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-4">
-            <Briefcase className="h-8 w-8 text-primary" />
+      {/* Selected Student Profile */}
+      {selectedStudent && (
+        <Card className="border-purple-200 bg-purple-50/30">
+          <CardContent className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="w-14 h-14 bg-purple-500 rounded-xl flex items-center justify-center">
+                <User className="h-7 w-7 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold">{selectedStudent.name}</h3>
+                <p className="text-sm text-muted-foreground">{selectedStudent.id} • {selectedStudent.school} • {selectedStudent.grade}</p>
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {selectedStudent.skills.map((skill) => (
+                    <Badge key={skill} className="bg-purple-100 text-purple-700 hover:bg-purple-200">{skill}</Badge>
+                  ))}
+                </div>
+                <div className="mt-3">
+                  <p className="text-sm text-muted-foreground">Aspirations: {selectedStudent.aspirations.join(', ')}</p>
+                </div>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => setSelectedStudent(null)}>
+                Change Student
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Loading State */}
+      {loadingMatches && (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+          <span className="ml-3 text-muted-foreground">Finding best job matches...</span>
+        </div>
+      )}
+
+      {/* Job Recommendations */}
+      {selectedStudent && !loadingMatches && jobs.length > 0 && (
+        <div>
+          <h2 className="text-lg font-semibold mb-4">Recommended Jobs ({jobs.length})</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {jobs.map((job) => {
+              const matchScore = calculateMatchScore(job, selectedStudent.skills);
+              return (
+                <Card key={job.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h3 className="font-semibold text-gray-900">{job.title}</h3>
+                        <p className="text-sm text-muted-foreground">{job.company}</p>
+                      </div>
+                      <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        matchScore >= 75 ? 'bg-green-100 text-green-700' :
+                        matchScore >= 50 ? 'bg-amber-100 text-amber-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {matchScore}% Match
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      <div className="flex items-center gap-2 text-sm">
+                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                        <span>{job.location}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <Building2 className="h-4 w-4 text-muted-foreground" />
+                        <span>{job.industry}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <IndianRupee className="h-4 w-4 text-muted-foreground" />
+                        <span>₹{job.salary_min.toLocaleString()} - ₹{job.salary_max.toLocaleString()}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                        <span>{job.openings} openings</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 mb-4">
+                      <Badge variant="outline">{job.job_type}</Badge>
+                      <Badge variant="outline">{job.education_level}</Badge>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1 mb-4">
+                      {job.required_skills.map((skill) => (
+                        <Badge
+                          key={skill}
+                          variant="outline"
+                          className={selectedStudent.skills.some(s =>
+                            s.toLowerCase().includes(skill.toLowerCase()) ||
+                            skill.toLowerCase().includes(s.toLowerCase())
+                          ) ? 'border-green-300 bg-green-50 text-green-700' : ''}
+                        >
+                          {skill}
+                        </Badge>
+                      ))}
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button className="flex-1">Apply for Student</Button>
+                      <Button variant="outline">Save</Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
-          <h3 className="text-lg font-semibold mb-2">Select a Student</h3>
-          <p className="text-muted-foreground text-center max-w-md">
-            Search and select a student above to see AI-powered job recommendations based on their skills and career interests
-          </p>
-        </CardContent>
-      </Card>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!selectedStudent && students.length === 0 && (
+        <Card className="border-dashed border-2">
+          <CardContent className="flex flex-col items-center justify-center py-16">
+            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-4">
+              <Briefcase className="h-8 w-8 text-primary" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">Select a Student</h3>
+            <p className="text-muted-foreground text-center max-w-md">
+              Search and select a student above to see AI-powered job recommendations based on their skills and career interests
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* No Matches */}
+      {selectedStudent && !loadingMatches && jobs.length === 0 && (
+        <Card className="border-dashed border-2">
+          <CardContent className="flex flex-col items-center justify-center py-16">
+            <div className="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center mb-4">
+              <Briefcase className="h-8 w-8 text-amber-600" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">No Matching Jobs</h3>
+            <p className="text-muted-foreground text-center max-w-md">
+              No jobs currently match this student's skill set. Consider matching them to a training programme first.
+            </p>
+            <Button className="mt-4" variant="outline" asChild>
+              <a href="/counsellor/programme-matching">Find Programmes Instead</a>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
