@@ -4,6 +4,7 @@ import { Users, AlertTriangle, TrendingUp, Bell, UserCheck, GraduationCap } from
 import { StatsCard, StatsCardSkeleton } from './StatsCard';
 import { PipelineChart } from './PipelineChart';
 import { RiskDistributionChart } from './RiskDistributionChart';
+import { EngagementChannelChart } from './EngagementChannelChart';
 import type { DashboardStatsExtended } from '@/lib/types/data';
 
 interface DashboardCardsProps {
@@ -95,6 +96,13 @@ export function DashboardCards({ stats, loading }: DashboardCardsProps) {
         <PipelineChart data={stats.byPipelineStage} total={stats.total} />
         <RiskDistributionChart data={stats.byRiskLevel} total={stats.total} />
       </div>
+
+      {/* Engagement Channel Analytics */}
+      {stats.byEngagementChannel && stats.byEngagementChannel.length > 0 && (
+        <div className="grid gap-6 lg:grid-cols-1">
+          <EngagementChannelChart data={stats.byEngagementChannel} total={stats.total} />
+        </div>
+      )}
 
       {/* Quick Actions */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

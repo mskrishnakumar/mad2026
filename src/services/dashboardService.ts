@@ -7,6 +7,7 @@ import {
   getMockStudents,
   getPipelineDistribution,
   getRiskDistribution,
+  getEngagementChannelStats,
 } from '@/lib/mockData/studentMockData';
 import { THRESHOLDS } from '@/lib/utils/riskCalculator';
 
@@ -36,6 +37,9 @@ export async function getDashboardStats(): Promise<DashboardStatsExtended> {
     s => s.riskScore.totalScore >= THRESHOLDS.HIGH_RISK_SCORE
   ).length;
 
+  // Calculate engagement channel statistics
+  const byEngagementChannel = getEngagementChannelStats(students);
+
   return {
     total: students.length,
     byPipelineStage,
@@ -43,6 +47,7 @@ export async function getDashboardStats(): Promise<DashboardStatsExtended> {
     atRiskCount,
     activeAlerts,
     placementRate,
+    byEngagementChannel,
   };
 }
 

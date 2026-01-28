@@ -19,7 +19,7 @@ export const THRESHOLDS = {
   HIGH_MAX: 84,          // 70-84 = High risk (red flag)
   CRITICAL_MIN: 85,      // 85-100 = Critical risk
   HIGH_RISK_SCORE: 70,   // Alert threshold
-  MAX_DISTANCE_KM: 30,   // Distance beyond which max risk applies
+  MAX_DISTANCE_KM: 10,   // Distance beyond which max risk applies (10km is high enough to dropout)
   MIN_LOGINS_EXPECTED: 10,  // Expected logins per 30 days
   MAX_CONTACT_ATTEMPTS: 5,  // Contact attempts before max concern (student unresponsive)
   LOW_QUIZ_SCORE: 40,    // Quiz score below this = high risk
@@ -60,7 +60,7 @@ function calculateBreakdown(factors: RiskFactors): RiskScoreBreakdown {
       WEIGHTS.ATTENDANCE * (1 - factors.firstWeekAttendance / 100)
     ),
 
-    // Distance: 0km = 0 points, 30km+ = 15 points (linear scale)
+    // Distance: 0km = 0 points, 10km+ = 15 points (linear scale)
     distanceRisk: Math.round(
       WEIGHTS.DISTANCE * Math.min(factors.distanceFromCentreKm / THRESHOLDS.MAX_DISTANCE_KM, 1)
     ),

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { AlertTriangle, Phone, MapPin, ChevronRight, Wifi, Smartphone } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { AlertTriangle, MapPin, ChevronRight, Wifi, WifiOff, Smartphone, Calendar, FileText, PhoneCall, LogIn } from 'lucide-react';
 import { RiskBadge } from './RiskBadge';
 import { PipelineStageBadge } from './PipelineStageBadge';
 import type { StudentExtended } from '@/lib/types/data';
@@ -95,42 +95,42 @@ function AtRiskStudentCard({ student }: { student: StudentExtended }) {
   const { riskFactors, riskScore } = student;
 
   // Identify top risk factors with priority ordering
-  const riskIndicators = [];
+  const riskIndicators: { icon: React.ElementType; label: string }[] = [];
 
-  // Distance from centre - geographic barrier
-  if (riskFactors.distanceFromCentreKm > 20) {
-    riskIndicators.push({ icon: '📍', label: `Far from centre (${riskFactors.distanceFromCentreKm}km)` });
+  // Distance from centre - geographic barrier (10km+ is concerning)
+  if (riskFactors.distanceFromCentreKm >= 10) {
+    riskIndicators.push({ icon: MapPin, label: `Far from centre (${riskFactors.distanceFromCentreKm}km)` });
   }
 
   // No mobile & internet - connectivity barrier
   if (!riskFactors.hasInternet && !riskFactors.hasMobile) {
-    riskIndicators.push({ icon: '📵', label: 'No mobile & internet' });
+    riskIndicators.push({ icon: WifiOff, label: 'No mobile & internet' });
   } else if (!riskFactors.hasInternet) {
-    riskIndicators.push({ icon: '📶', label: 'No internet access' });
+    riskIndicators.push({ icon: Wifi, label: 'No internet access' });
   } else if (!riskFactors.hasMobile) {
-    riskIndicators.push({ icon: '📱', label: 'No mobile access' });
+    riskIndicators.push({ icon: Smartphone, label: 'No mobile access' });
   } else if (riskFactors.mobileType === 'basic') {
-    riskIndicators.push({ icon: '📱', label: 'Basic phone only' });
+    riskIndicators.push({ icon: Smartphone, label: 'Basic phone only' });
   }
 
   // Low first week attendance
   if (riskFactors.firstWeekAttendance < 50) {
-    riskIndicators.push({ icon: '📅', label: `Low attendance (${riskFactors.firstWeekAttendance}%)` });
+    riskIndicators.push({ icon: Calendar, label: `Low attendance (${riskFactors.firstWeekAttendance}%)` });
   }
 
   // Poor quiz scores (below 40%)
   if (riskFactors.quizScore < 40) {
-    riskIndicators.push({ icon: '📝', label: `Poor quiz score (${riskFactors.quizScore}%)` });
+    riskIndicators.push({ icon: FileText, label: `Poor quiz score (${riskFactors.quizScore}%)` });
   }
 
   // High counsellor contact attempts - student unresponsive
   if (riskFactors.counsellorContactAttempts >= 4) {
-    riskIndicators.push({ icon: '📞', label: `Unresponsive (${riskFactors.counsellorContactAttempts} contact attempts)` });
+    riskIndicators.push({ icon: PhoneCall, label: `Unresponsive (${riskFactors.counsellorContactAttempts} attempts)` });
   }
 
   // Low engagement (login attempts)
   if (riskFactors.loginAttempts < 3) {
-    riskIndicators.push({ icon: '🔐', label: 'Low platform engagement' });
+    riskIndicators.push({ icon: LogIn, label: 'Low platform engagement' });
   }
 
   return (
@@ -161,12 +161,15 @@ function AtRiskStudentCard({ student }: { student: StudentExtended }) {
 
       {/* Risk Indicators */}
       <div className="space-y-1">
-        {riskIndicators.slice(0, 3).map((indicator, index) => (
-          <div key={index} className="flex items-center gap-1.5 text-xs text-gray-600">
-            <span>{indicator.icon}</span>
-            <span>{indicator.label}</span>
-          </div>
-        ))}
+        {riskIndicators.slice(0, 3).map((indicator, index) => {
+          const Icon = indicator.icon;
+          return (
+            <div key={index} className="flex items-center gap-1.5 text-xs text-gray-600">
+              <Icon className="h-3 w-3 text-gray-500" />
+              <span>{indicator.label}</span>
+            </div>
+          );
+        })}
         {riskIndicators.length > 3 && (
           <p className="text-xs text-gray-400">
             +{riskIndicators.length - 3} more factors

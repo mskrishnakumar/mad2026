@@ -205,6 +205,29 @@ export interface StudentExtended extends Student {
   lastCounsellorContact?: string;
   centreId: string;
   centreName: string;
+  engagementData?: EngagementRecord[];  // engagement channel tracking
+  preferredChannel?: EngagementChannel; // student's preferred contact method
+}
+
+// Engagement Channel types
+export type EngagementChannel = 'whatsapp' | 'sms' | 'email' | 'phone' | 'in_person';
+
+// Engagement tracking per student
+export interface EngagementRecord {
+  channel: EngagementChannel;
+  successfulContacts: number;    // times student responded
+  totalAttempts: number;         // total outreach attempts
+  lastContactDate?: string;
+  outcome: 'positive' | 'neutral' | 'no_response';
+}
+
+// Aggregated channel statistics for dashboard
+export interface EngagementChannelStats {
+  channel: EngagementChannel;
+  totalStudents: number;         // students contacted via this channel
+  responseRate: number;          // percentage who responded
+  positiveOutcomes: number;      // students with positive progression
+  averageResponseTime: number;   // avg days to respond
 }
 
 // Extended Dashboard Statistics
@@ -220,4 +243,5 @@ export interface DashboardStatsExtended {
   atRiskCount: number;        // students with score > 70
   activeAlerts: number;
   placementRate: number;      // percentage of students placed
+  byEngagementChannel?: EngagementChannelStats[];  // engagement channel breakdown
 }

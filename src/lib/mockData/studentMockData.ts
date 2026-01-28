@@ -3,6 +3,9 @@ import type {
   PipelineStage,
   RiskFactors,
   StudentAlert,
+  EngagementChannel,
+  EngagementRecord,
+  EngagementChannelStats,
 } from '@/lib/types/data';
 import { calculateRiskScore } from '@/lib/utils/riskCalculator';
 
@@ -66,6 +69,15 @@ const CENTRES = [
   { id: 'CTR005', name: 'Magic Bus Centre - Bangalore' },
 ];
 
+// Engagement channels with realistic weights (WhatsApp most common in India)
+const ENGAGEMENT_CHANNELS: { channel: EngagementChannel; weight: number; responseRate: number }[] = [
+  { channel: 'whatsapp', weight: 40, responseRate: 0.78 },  // Highest engagement
+  { channel: 'phone', weight: 25, responseRate: 0.65 },
+  { channel: 'sms', weight: 15, responseRate: 0.45 },
+  { channel: 'in_person', weight: 12, responseRate: 0.92 }, // Best but less frequent
+  { channel: 'email', weight: 8, responseRate: 0.32 },      // Lowest for this demographic
+];
+
 // Utility functions
 function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -104,10 +116,10 @@ function getWeightedPipelineStage(): PipelineStage {
  */
 function generateRiskFactors(isHighRisk: boolean = false): RiskFactors {
   if (isHighRisk) {
-    // High-risk profile: poor attendance, far distance, limited connectivity
+    // High-risk profile: poor attendance, far distance (10km+ is concerning), limited connectivity
     return {
       firstWeekAttendance: randomInt(0, 40),
-      distanceFromCentreKm: randomInt(20, 45),
+      distanceFromCentreKm: randomInt(10, 25),  // 10km+ triggers risk (reduced from 20-45)
       isFirstGenGraduate: Math.random() > 0.3,
       hasInternet: Math.random() > 0.7,
       hasMobile: Math.random() > 0.3,
@@ -118,10 +130,10 @@ function generateRiskFactors(isHighRisk: boolean = false): RiskFactors {
     };
   }
 
-  // Normal profile with variance
+  // Normal profile with variance - most students within 10km
   return {
     firstWeekAttendance: randomInt(60, 100),
-    distanceFromCentreKm: randomInt(2, 20),
+    distanceFromCentreKm: randomInt(1, 9),  // Within acceptable range (reduced from 2-20)
     isFirstGenGraduate: Math.random() > 0.5,
     hasInternet: Math.random() > 0.4,
     hasMobile: true,
@@ -130,6 +142,72 @@ function generateRiskFactors(isHighRisk: boolean = false): RiskFactors {
     counsellorContactAttempts: randomInt(0, 3),
     quizScore: randomInt(45, 95),
   };
+}
+
+/**
+ * Get a weighted random engagement channel
+ */
+function getWeightedChannel(): EngagementChannel {
+  const totalWeight = ENGAGEMENT_CHANNELS.reduce((sum, c) => sum + c.weight, 0);
+  let random = Math.random() * totalWeight;
+
+  for (const item of ENGAGEMENT_CHANNELS) {
+    random -= item.weight;
+    if (random <= 0) return item.channel;
+  }
+
+  return 'whatsapp';
+}
+
+/**
+ * Generate engagement records for a student
+ * Correlates with risk level - high risk students have lower engagement
+ */
+function generateEngagementData(riskLevel: string): EngagementRecord[] {
+  const preferredChannel = getWeightedChannel();
+  const channelConfig = ENGAGEMENT_CHANNELS.find(c => c.channel === preferredChannel)!;
+
+  // Adjust response rate based on risk level
+  const riskMultiplier = {
+    low: 1.1,
+    medium: 0.9,
+    high: 0.6,
+    critical: 0.3,
+  }[riskLevel] || 1;
+
+  const adjustedResponseRate = Math.min(channelConfig.responseRate * riskMultiplier, 1);
+  const totalAttempts = randomInt(3, 12);
+  const successfulContacts = Math.round(totalAttempts * adjustedResponseRate);
+
+  const records: EngagementRecord[] = [
+    {
+      channel: preferredChannel,
+      totalAttempts,
+      successfulContacts,
+      lastContactDate: generateRandomDate(7),
+      outcome: successfulContacts / totalAttempts > 0.5 ? 'positive' :
+               successfulContacts > 0 ? 'neutral' : 'no_response',
+    },
+  ];
+
+  // Some students have secondary channels
+  if (Math.random() > 0.4) {
+    const secondaryChannels = ENGAGEMENT_CHANNELS.filter(c => c.channel !== preferredChannel);
+    const secondaryChannel = randomElement(secondaryChannels);
+    const secAttempts = randomInt(1, 5);
+    const secSuccess = Math.round(secAttempts * secondaryChannel.responseRate * riskMultiplier);
+
+    records.push({
+      channel: secondaryChannel.channel,
+      totalAttempts: secAttempts,
+      successfulContacts: secSuccess,
+      lastContactDate: generateRandomDate(14),
+      outcome: secSuccess / secAttempts > 0.5 ? 'positive' :
+               secSuccess > 0 ? 'neutral' : 'no_response',
+    });
+  }
+
+  return records;
 }
 
 /**
@@ -149,6 +227,9 @@ export function generateMockStudent(index: number): StudentExtended {
 
   const skills = randomElements(SKILLS_POOL, randomInt(2, 5));
   const aspirations = randomElements(ASPIRATIONS_POOL, randomInt(1, 3));
+
+  const engagementData = generateEngagementData(riskScore.riskLevel);
+  const preferredChannel = engagementData[0]?.channel || 'whatsapp';
 
   return {
     id: `STU${String(index + 1).padStart(4, '0')}`,
@@ -170,6 +251,8 @@ export function generateMockStudent(index: number): StudentExtended {
     lastCounsellorContact: generateRandomDate(7),
     centreId: centre.id,
     centreName: centre.name,
+    engagementData,
+    preferredChannel,
   };
 }
 
@@ -255,7 +338,7 @@ function createAtRiskSampleCandidates(): StudentExtended[] {
 
   const sampleCandidates: StudentExtended[] = [
     // Candidate 1: DISTANCE FROM CENTRE dominant (Student Onboarding)
-    // Only this candidate should show "Far from centre" indicator
+    // Only this candidate should show "Far from centre" indicator (10km+ is concerning)
     {
       id: 'STU0001',
       name: 'Priya Sharma',
@@ -272,7 +355,7 @@ function createAtRiskSampleCandidates(): StudentExtended[] {
       pipelineStage: 'Student Onboarding',
       ...createRiskFactors({
         firstWeekAttendance: 52,          // Just above 50% (~12 pts)
-        distanceFromCentreKm: 42,         // DOMINANT: Very far from centre (~15 pts)
+        distanceFromCentreKm: 18,         // DOMINANT: Far from centre - 10km+ (~15 pts max)
         isFirstGenGraduate: true,         // +10 pts
         hasInternet: false,               // +10 pts
         hasMobile: true,
@@ -285,6 +368,10 @@ function createAtRiskSampleCandidates(): StudentExtended[] {
       lastCounsellorContact: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
       centreId: 'CTR002',
       centreName: 'Magic Bus Centre - Thane',
+      engagementData: [
+        { channel: 'phone', totalAttempts: 8, successfulContacts: 3, outcome: 'neutral', lastContactDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() },
+      ],
+      preferredChannel: 'phone',
     },
 
     // Candidate 2: NO MOBILE & INTERNET dominant (Counselling)
@@ -318,6 +405,10 @@ function createAtRiskSampleCandidates(): StudentExtended[] {
       lastCounsellorContact: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
       centreId: 'CTR001',
       centreName: 'Magic Bus Centre - Andheri',
+      engagementData: [
+        { channel: 'in_person', totalAttempts: 5, successfulContacts: 4, outcome: 'positive', lastContactDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
+      ],
+      preferredChannel: 'in_person',
     },
 
     // Candidate 3: LOW FIRST WEEK ATTENDANCE dominant (Training)
@@ -351,10 +442,15 @@ function createAtRiskSampleCandidates(): StudentExtended[] {
       lastCounsellorContact: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
       centreId: 'CTR001',
       centreName: 'Magic Bus Centre - Andheri',
+      engagementData: [
+        { channel: 'whatsapp', totalAttempts: 10, successfulContacts: 4, outcome: 'neutral', lastContactDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() },
+        { channel: 'phone', totalAttempts: 3, successfulContacts: 1, outcome: 'no_response', lastContactDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
+      ],
+      preferredChannel: 'whatsapp',
     },
 
     // Candidate 4: POOR QUIZ SCORES dominant (Enrollment)
-    // Distance is moderate - should NOT show "Far from centre"
+    // Distance is low - should NOT show "Far from centre" (under 10km)
     {
       id: 'STU0004',
       name: 'Amit Singh',
@@ -371,7 +467,7 @@ function createAtRiskSampleCandidates(): StudentExtended[] {
       pipelineStage: 'Enrollment',
       ...createRiskFactors({
         firstWeekAttendance: 58,          // Above 50% (~10 pts)
-        distanceFromCentreKm: 10,         // Close - NO "far" indicator (~5 pts)
+        distanceFromCentreKm: 5,          // Close - NO "far" indicator (~7 pts)
         isFirstGenGraduate: true,         // +10 pts
         hasInternet: false,               // +10 pts
         hasMobile: true,
@@ -384,10 +480,14 @@ function createAtRiskSampleCandidates(): StudentExtended[] {
       lastCounsellorContact: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
       centreId: 'CTR004',
       centreName: 'Magic Bus Centre - Pune',
+      engagementData: [
+        { channel: 'sms', totalAttempts: 6, successfulContacts: 2, outcome: 'neutral', lastContactDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
+      ],
+      preferredChannel: 'sms',
     },
 
     // Candidate 5: HIGH COUNSELLOR CONTACT ATTEMPTS - Student Unresponsive (Training)
-    // Distance is moderate - should NOT show "Far from centre"
+    // Distance is low - should NOT show "Far from centre" (under 10km)
     {
       id: 'STU0005',
       name: 'Deepa Reddy',
@@ -404,7 +504,7 @@ function createAtRiskSampleCandidates(): StudentExtended[] {
       pipelineStage: 'Training',
       ...createRiskFactors({
         firstWeekAttendance: 55,          // Above 50% (~11 pts)
-        distanceFromCentreKm: 12,         // Moderate - NO "far" indicator (~6 pts)
+        distanceFromCentreKm: 7,          // Close - NO "far" indicator (~10 pts)
         isFirstGenGraduate: true,         // +10 pts
         hasInternet: false,               // +10 pts
         hasMobile: true,
@@ -417,6 +517,11 @@ function createAtRiskSampleCandidates(): StudentExtended[] {
       lastCounsellorContact: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
       centreId: 'CTR005',
       centreName: 'Magic Bus Centre - Bangalore',
+      engagementData: [
+        { channel: 'whatsapp', totalAttempts: 12, successfulContacts: 2, outcome: 'no_response', lastContactDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() },
+        { channel: 'phone', totalAttempts: 9, successfulContacts: 1, outcome: 'no_response', lastContactDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
+      ],
+      preferredChannel: 'whatsapp',
     },
   ];
 
@@ -448,4 +553,75 @@ export function getMockAlerts(): StudentAlert[] {
 export function resetMockData(): void {
   cachedStudents = null;
   cachedAlerts = null;
+}
+
+/**
+ * Calculate engagement channel statistics from students
+ * Shows which channels result in better outcomes
+ */
+export function getEngagementChannelStats(students: StudentExtended[]): EngagementChannelStats[] {
+  const channelMap = new Map<EngagementChannel, {
+    students: Set<string>;
+    totalAttempts: number;
+    successfulContacts: number;
+    positiveOutcomes: number;
+    responseTimes: number[];
+  }>();
+
+  // Initialize all channels
+  const allChannels: EngagementChannel[] = ['whatsapp', 'phone', 'sms', 'in_person', 'email'];
+  allChannels.forEach(channel => {
+    channelMap.set(channel, {
+      students: new Set(),
+      totalAttempts: 0,
+      successfulContacts: 0,
+      positiveOutcomes: 0,
+      responseTimes: [],
+    });
+  });
+
+  // Aggregate data from students
+  students.forEach(student => {
+    if (!student.engagementData) return;
+
+    student.engagementData.forEach(record => {
+      const stats = channelMap.get(record.channel)!;
+      stats.students.add(student.id);
+      stats.totalAttempts += record.totalAttempts;
+      stats.successfulContacts += record.successfulContacts;
+
+      if (record.outcome === 'positive') {
+        stats.positiveOutcomes++;
+      }
+
+      // Simulate response time based on success rate
+      if (record.successfulContacts > 0) {
+        const avgResponseDays = record.channel === 'in_person' ? 0 :
+                                record.channel === 'whatsapp' ? randomInt(1, 2) :
+                                record.channel === 'phone' ? randomInt(1, 3) :
+                                record.channel === 'sms' ? randomInt(2, 4) :
+                                randomInt(3, 7);
+        stats.responseTimes.push(avgResponseDays);
+      }
+    });
+  });
+
+  // Convert to array of stats
+  return allChannels.map(channel => {
+    const stats = channelMap.get(channel)!;
+    const responseRate = stats.totalAttempts > 0
+      ? (stats.successfulContacts / stats.totalAttempts) * 100
+      : 0;
+    const avgResponseTime = stats.responseTimes.length > 0
+      ? stats.responseTimes.reduce((a, b) => a + b, 0) / stats.responseTimes.length
+      : 0;
+
+    return {
+      channel,
+      totalStudents: stats.students.size,
+      responseRate: Math.round(responseRate * 10) / 10,
+      positiveOutcomes: stats.positiveOutcomes,
+      averageResponseTime: Math.round(avgResponseTime * 10) / 10,
+    };
+  }).sort((a, b) => b.responseRate - a.responseRate); // Sort by response rate
 }
