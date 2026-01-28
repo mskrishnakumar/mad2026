@@ -41,21 +41,21 @@ interface RecommendedAction {
 
 function getRecommendedActions(student: StudentExtended): RecommendedAction[] {
   const actions: RecommendedAction[] = [];
-  const { riskFactors } = student;
+  const { riskFactors, pipelineStage } = student;
 
-  // Distance-based recommendations (10km+ is concerning)
-  if (riskFactors.distanceFromCentreKm >= 10) {
+  // Distance-based recommendations (only for Enrollment stage, max 9km)
+  if (pipelineStage === 'Enrollment' && riskFactors.distanceFromCentreKm >= 5) {
     actions.push({
       id: 'transport',
       title: 'Arrange Transport Support',
       description: `Student is ${riskFactors.distanceFromCentreKm}km from centre. Consider transport allowance, carpool arrangements, or transfer to a closer centre.`,
-      priority: riskFactors.distanceFromCentreKm >= 15 ? 'high' : 'medium',
+      priority: riskFactors.distanceFromCentreKm >= 7 ? 'high' : 'medium',
       icon: MapPin,
       category: 'Geographic Barrier',
     });
   }
 
-  // Connectivity-based recommendations
+  // Connectivity-based recommendations (all stages)
   if (!riskFactors.hasInternet && !riskFactors.hasMobile) {
     actions.push({
       id: 'connectivity',
@@ -94,49 +94,53 @@ function getRecommendedActions(student: StudentExtended): RecommendedAction[] {
     });
   }
 
-  // Attendance-based recommendations
-  if (riskFactors.firstWeekAttendance < 50) {
-    actions.push({
-      id: 'attendance',
-      title: 'Urgent Attendance Intervention',
-      description: `First week attendance is only ${riskFactors.firstWeekAttendance}%. Schedule immediate counselling call to understand barriers.`,
-      priority: 'high',
-      icon: Calendar,
-      category: 'Engagement',
-    });
-  } else if (riskFactors.firstWeekAttendance < 75) {
-    actions.push({
-      id: 'attendance-followup',
-      title: 'Follow Up on Attendance',
-      description: `Attendance at ${riskFactors.firstWeekAttendance}%. Check for scheduling conflicts or personal challenges.`,
-      priority: 'medium',
-      icon: Calendar,
-      category: 'Engagement',
-    });
+  // Attendance-based recommendations (only for Training stage)
+  if (pipelineStage === 'Training') {
+    if (riskFactors.firstWeekAttendance < 50) {
+      actions.push({
+        id: 'attendance',
+        title: 'Urgent Attendance Intervention',
+        description: `First week attendance is only ${riskFactors.firstWeekAttendance}%. Schedule immediate counselling call to understand barriers.`,
+        priority: 'high',
+        icon: Calendar,
+        category: 'Engagement',
+      });
+    } else if (riskFactors.firstWeekAttendance < 75) {
+      actions.push({
+        id: 'attendance-followup',
+        title: 'Follow Up on Attendance',
+        description: `Attendance at ${riskFactors.firstWeekAttendance}%. Check for scheduling conflicts or personal challenges.`,
+        priority: 'medium',
+        icon: Calendar,
+        category: 'Engagement',
+      });
+    }
   }
 
-  // Quiz score recommendations
-  if (riskFactors.quizScore < 40) {
-    actions.push({
-      id: 'academic',
-      title: 'Provide Academic Support',
-      description: `Quiz score of ${riskFactors.quizScore}% indicates learning gaps. Arrange peer tutoring or remedial sessions.`,
-      priority: 'high',
-      icon: GraduationCap,
-      category: 'Academic',
-    });
-  } else if (riskFactors.quizScore < 60) {
-    actions.push({
-      id: 'academic-moderate',
-      title: 'Monitor Academic Progress',
-      description: `Quiz score at ${riskFactors.quizScore}%. Schedule study group participation and provide additional resources.`,
-      priority: 'medium',
-      icon: GraduationCap,
-      category: 'Academic',
-    });
+  // Quiz score recommendations (for Training and Pre-placement)
+  if (pipelineStage === 'Training' || pipelineStage === 'Pre-placement') {
+    if (riskFactors.quizScore < 40) {
+      actions.push({
+        id: 'academic',
+        title: 'Provide Academic Support',
+        description: `Quiz score of ${riskFactors.quizScore}% indicates learning gaps. Arrange peer tutoring or remedial sessions.`,
+        priority: 'high',
+        icon: GraduationCap,
+        category: 'Academic',
+      });
+    } else if (riskFactors.quizScore < 60) {
+      actions.push({
+        id: 'academic-moderate',
+        title: 'Monitor Academic Progress',
+        description: `Quiz score at ${riskFactors.quizScore}%. Schedule study group participation and provide additional resources.`,
+        priority: 'medium',
+        icon: GraduationCap,
+        category: 'Academic',
+      });
+    }
   }
 
-  // Contact attempts recommendations (student unresponsive)
+  // Contact attempts recommendations (student unresponsive - all stages)
   if (riskFactors.counsellorContactAttempts >= 4) {
     actions.push({
       id: 'unresponsive',
@@ -157,8 +161,8 @@ function getRecommendedActions(student: StudentExtended): RecommendedAction[] {
     });
   }
 
-  // Low engagement recommendations
-  if (riskFactors.loginAttempts < 3) {
+  // Low engagement recommendations (for Training and onwards)
+  if ((pipelineStage === 'Training' || pipelineStage === 'Pre-placement' || pipelineStage === 'Post Placement') && riskFactors.loginAttempts < 3) {
     actions.push({
       id: 'engagement',
       title: 'Boost Platform Engagement',
@@ -169,7 +173,7 @@ function getRecommendedActions(student: StudentExtended): RecommendedAction[] {
     });
   }
 
-  // First generation graduate support
+  // First generation graduate support (all stages)
   if (riskFactors.isFirstGenGraduate) {
     actions.push({
       id: 'firstgen',
@@ -333,7 +337,7 @@ export default function StudentDetailPage() {
                     <MapPin className="h-4 w-4 text-muted-foreground" />
                     Distance from Centre
                   </span>
-                  <span className={riskFactors.distanceFromCentreKm >= 10 ? 'text-red-600 font-medium' : ''}>
+                  <span className={student.pipelineStage === 'Enrollment' && riskFactors.distanceFromCentreKm >= 5 ? 'text-red-600 font-medium' : ''}>
                     {riskFactors.distanceFromCentreKm}km
                   </span>
                 </div>
@@ -342,7 +346,7 @@ export default function StudentDetailPage() {
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     First Week Attendance
                   </span>
-                  <span className={riskFactors.firstWeekAttendance < 50 ? 'text-red-600 font-medium' : ''}>
+                  <span className={student.pipelineStage === 'Training' && riskFactors.firstWeekAttendance < 50 ? 'text-red-600 font-medium' : ''}>
                     {riskFactors.firstWeekAttendance}%
                   </span>
                 </div>
@@ -351,7 +355,7 @@ export default function StudentDetailPage() {
                     <FileText className="h-4 w-4 text-muted-foreground" />
                     Quiz Score
                   </span>
-                  <span className={riskFactors.quizScore < 40 ? 'text-red-600 font-medium' : ''}>
+                  <span className={(student.pipelineStage === 'Training' || student.pipelineStage === 'Pre-placement') && riskFactors.quizScore < 40 ? 'text-red-600 font-medium' : ''}>
                     {riskFactors.quizScore}%
                   </span>
                 </div>
@@ -378,7 +382,7 @@ export default function StudentDetailPage() {
                     <TrendingUp className="h-4 w-4 text-muted-foreground" />
                     Platform Logins
                   </span>
-                  <span className={riskFactors.loginAttempts < 3 ? 'text-amber-600 font-medium' : ''}>
+                  <span className={(student.pipelineStage === 'Training' || student.pipelineStage === 'Pre-placement' || student.pipelineStage === 'Post Placement') && riskFactors.loginAttempts < 3 ? 'text-amber-600 font-medium' : ''}>
                     {riskFactors.loginAttempts} times
                   </span>
                 </div>

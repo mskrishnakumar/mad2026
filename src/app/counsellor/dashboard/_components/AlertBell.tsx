@@ -96,12 +96,14 @@ export function AlertBell({
               </div>
             ) : (
               alerts.map((alert) => (
-                <div
+                <a
                   key={alert.id}
+                  href={`/counsellor/students/${alert.studentId}`}
                   className={cn(
-                    'flex gap-3 border-b border-gray-50 px-4 py-3 transition-colors hover:bg-gray-50',
+                    'flex gap-3 border-b border-gray-50 px-4 py-3 transition-colors hover:bg-gray-50 cursor-pointer',
                     !alert.isRead && 'bg-blue-50/50'
                   )}
+                  onClick={() => setIsOpen(false)}
                 >
                   {/* Icon */}
                   <div
@@ -135,14 +137,18 @@ export function AlertBell({
                   {/* Mark Read Button */}
                   {!alert.isRead && (
                     <button
-                      onClick={() => onMarkRead(alert.id)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onMarkRead(alert.id);
+                      }}
                       className="shrink-0 self-start rounded-full p-1 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
                       title="Mark as read"
                     >
                       <Check className="h-3.5 w-3.5" />
                     </button>
                   )}
-                </div>
+                </a>
               ))
             )}
           </div>

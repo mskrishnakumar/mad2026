@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +16,7 @@ const statusColors: Record<string, string> = {
 };
 
 export default function StudentsPage() {
+  const router = useRouter();
   const [students, setStudents] = useState<StudentParsed[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -137,7 +139,13 @@ export default function StudentsPage() {
                         </div>
                       </td>
                       <td className="p-4">
-                        <Button variant="ghost" size="sm">View</Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => router.push(`/counsellor/students/${student.id}`)}
+                        >
+                          View
+                        </Button>
                       </td>
                     </tr>
                   ))}

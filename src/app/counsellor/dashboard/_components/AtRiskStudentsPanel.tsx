@@ -92,17 +92,21 @@ export function AtRiskStudentsPanel() {
 }
 
 function AtRiskStudentCard({ student }: { student: StudentExtended }) {
-  const { riskFactors, riskScore } = student;
+  const { riskFactors, riskScore, pipelineStage } = student;
 
   // Identify top risk factors with priority ordering
+  // Factors are aligned with pipeline stages:
+  // - Far from centre: Enrollment stage only
+  // - Low attendance: Training stage only
+  // - Other factors: applicable to all stages
   const riskIndicators: { icon: React.ElementType; label: string }[] = [];
 
-  // Distance from centre - geographic barrier (10km+ is concerning)
-  if (riskFactors.distanceFromCentreKm >= 10) {
+  // Distance from centre - geographic barrier (only for Enrollment stage)
+  if (pipelineStage === 'Enrollment' && riskFactors.distanceFromCentreKm >= 5) {
     riskIndicators.push({ icon: MapPin, label: `Far from centre (${riskFactors.distanceFromCentreKm}km)` });
   }
 
-  // No mobile & internet - connectivity barrier
+  // No mobile & internet - connectivity barrier (all stages)
   if (!riskFactors.hasInternet && !riskFactors.hasMobile) {
     riskIndicators.push({ icon: WifiOff, label: 'No mobile & internet' });
   } else if (!riskFactors.hasInternet) {
@@ -113,23 +117,23 @@ function AtRiskStudentCard({ student }: { student: StudentExtended }) {
     riskIndicators.push({ icon: Smartphone, label: 'Basic phone only' });
   }
 
-  // Low first week attendance
-  if (riskFactors.firstWeekAttendance < 50) {
+  // Low first week attendance (only for Training stage)
+  if (pipelineStage === 'Training' && riskFactors.firstWeekAttendance < 50) {
     riskIndicators.push({ icon: Calendar, label: `Low attendance (${riskFactors.firstWeekAttendance}%)` });
   }
 
-  // Poor quiz scores (below 40%)
-  if (riskFactors.quizScore < 40) {
+  // Poor quiz scores (below 40%) - for Training and Pre-placement
+  if ((pipelineStage === 'Training' || pipelineStage === 'Pre-placement') && riskFactors.quizScore < 40) {
     riskIndicators.push({ icon: FileText, label: `Poor quiz score (${riskFactors.quizScore}%)` });
   }
 
-  // High counsellor contact attempts - student unresponsive
+  // High counsellor contact attempts - student unresponsive (all stages)
   if (riskFactors.counsellorContactAttempts >= 4) {
     riskIndicators.push({ icon: PhoneCall, label: `Unresponsive (${riskFactors.counsellorContactAttempts} attempts)` });
   }
 
-  // Low engagement (login attempts)
-  if (riskFactors.loginAttempts < 3) {
+  // Low engagement (login attempts) - for Training and onwards
+  if ((pipelineStage === 'Training' || pipelineStage === 'Pre-placement' || pipelineStage === 'Post Placement') && riskFactors.loginAttempts < 3) {
     riskIndicators.push({ icon: LogIn, label: 'Low platform engagement' });
   }
 
@@ -159,9 +163,9 @@ function AtRiskStudentCard({ student }: { student: StudentExtended }) {
         <PipelineStageBadge stage={student.pipelineStage} size="sm" />
       </div>
 
-      {/* Risk Indicators */}
+      {/* Risk Indicators - Show top 2 drivers only */}
       <div className="space-y-1">
-        {riskIndicators.slice(0, 3).map((indicator, index) => {
+        {riskIndicators.slice(0, 2).map((indicator, index) => {
           const Icon = indicator.icon;
           return (
             <div key={index} className="flex items-center gap-1.5 text-xs text-gray-600">
@@ -170,9 +174,9 @@ function AtRiskStudentCard({ student }: { student: StudentExtended }) {
             </div>
           );
         })}
-        {riskIndicators.length > 3 && (
+        {riskIndicators.length > 2 && (
           <p className="text-xs text-gray-400">
-            +{riskIndicators.length - 3} more factors
+            +{riskIndicators.length - 2} more factors
           </p>
         )}
       </div>

@@ -6,6 +6,8 @@ import type {
   EngagementChannel,
   EngagementRecord,
   EngagementChannelStats,
+  ReferralSource,
+  ReferralSourceStats,
 } from '@/lib/types/data';
 import { calculateRiskScore } from '@/lib/utils/riskCalculator';
 
@@ -78,7 +80,66 @@ const ENGAGEMENT_CHANNELS: { channel: EngagementChannel; weight: number; respons
   { channel: 'email', weight: 8, responseRate: 0.32 },      // Lowest for this demographic
 ];
 
-// Utility functions
+// Referral sources with weights and expected outcomes
+// Alumni referrals have the BEST outcomes - they know what the program offers
+const REFERRAL_SOURCES: {
+  source: ReferralSource;
+  weight: number;
+  placementBonus: number;    // Higher = better placement rate
+  retentionBonus: number;    // Higher = better retention
+  riskReduction: number;     // Higher = lower risk scores
+}[] = [
+  { source: 'alumni', weight: 15, placementBonus: 0.35, retentionBonus: 0.30, riskReduction: 20 },        // BEST - trusted recommendation
+  { source: 'community', weight: 18, placementBonus: 0.20, retentionBonus: 0.20, riskReduction: 12 },    // Strong local connection
+  { source: 'school', weight: 12, placementBonus: 0.18, retentionBonus: 0.18, riskReduction: 10 },       // Institutional support
+  { source: 'ngo_partner', weight: 14, placementBonus: 0.15, retentionBonus: 0.22, riskReduction: 15 },  // Pre-screened candidates
+  { source: 'government', weight: 10, placementBonus: 0.12, retentionBonus: 0.15, riskReduction: 8 },    // Scheme referrals
+  { source: 'word_of_mouth', weight: 16, placementBonus: 0.10, retentionBonus: 0.12, riskReduction: 5 }, // Friends/family
+  { source: 'social_media', weight: 10, placementBonus: 0.05, retentionBonus: 0.08, riskReduction: 0 },  // Lower commitment
+  { source: 'self_discovery', weight: 5, placementBonus: 0.08, retentionBonus: 0.10, riskReduction: 3 }, // Walk-ins
+];
+
+// Seeded random number generator for deterministic data
+// This ensures the same index always generates the same student
+class SeededRandom {
+  private seed: number;
+
+  constructor(seed: number) {
+    this.seed = seed;
+  }
+
+  // Simple mulberry32 PRNG
+  next(): number {
+    let t = (this.seed += 0x6d2b79f5);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  }
+
+  nextInt(min: number, max: number): number {
+    return Math.floor(this.next() * (max - min + 1)) + min;
+  }
+
+  nextElement<T>(array: T[]): T {
+    return array[Math.floor(this.next() * array.length)];
+  }
+
+  nextElements<T>(array: T[], count: number): T[] {
+    const copy = [...array];
+    const result: T[] = [];
+    for (let i = 0; i < Math.min(count, copy.length); i++) {
+      const idx = Math.floor(this.next() * copy.length);
+      result.push(copy.splice(idx, 1)[0]);
+    }
+    return result;
+  }
+
+  nextBoolean(probability: number = 0.5): boolean {
+    return this.next() < probability;
+  }
+}
+
+// Utility functions using Math.random for non-critical randomness
 function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -116,10 +177,10 @@ function getWeightedPipelineStage(): PipelineStage {
  */
 function generateRiskFactors(isHighRisk: boolean = false): RiskFactors {
   if (isHighRisk) {
-    // High-risk profile: poor attendance, far distance (10km+ is concerning), limited connectivity
+    // High-risk profile: poor attendance, far distance (max 9km), limited connectivity
     return {
       firstWeekAttendance: randomInt(0, 40),
-      distanceFromCentreKm: randomInt(10, 25),  // 10km+ triggers risk (reduced from 20-45)
+      distanceFromCentreKm: randomInt(5, 9),  // Max 9km for far from centre
       isFirstGenGraduate: Math.random() > 0.3,
       hasInternet: Math.random() > 0.7,
       hasMobile: Math.random() > 0.3,
@@ -130,10 +191,10 @@ function generateRiskFactors(isHighRisk: boolean = false): RiskFactors {
     };
   }
 
-  // Normal profile with variance - most students within 10km
+  // Normal profile with variance - most students within 5km
   return {
     firstWeekAttendance: randomInt(60, 100),
-    distanceFromCentreKm: randomInt(1, 9),  // Within acceptable range (reduced from 2-20)
+    distanceFromCentreKm: randomInt(1, 4),  // Within acceptable range (under 5km)
     isFirstGenGraduate: Math.random() > 0.5,
     hasInternet: Math.random() > 0.4,
     hasMobile: true,
@@ -157,6 +218,21 @@ function getWeightedChannel(): EngagementChannel {
   }
 
   return 'whatsapp';
+}
+
+/**
+ * Get a weighted random referral source
+ */
+function getWeightedReferralSource(): ReferralSource {
+  const totalWeight = REFERRAL_SOURCES.reduce((sum, r) => sum + r.weight, 0);
+  let random = Math.random() * totalWeight;
+
+  for (const item of REFERRAL_SOURCES) {
+    random -= item.weight;
+    if (random <= 0) return item.source;
+  }
+
+  return 'community';
 }
 
 /**
@@ -211,48 +287,145 @@ function generateEngagementData(riskLevel: string): EngagementRecord[] {
 }
 
 /**
- * Generate a single mock extended student
+ * Generate risk factors using seeded RNG for consistency
+ */
+function generateSeededRiskFactors(rng: SeededRandom, isHighRisk: boolean): RiskFactors {
+  if (isHighRisk) {
+    return {
+      firstWeekAttendance: rng.nextInt(0, 40),
+      distanceFromCentreKm: rng.nextInt(5, 9),
+      isFirstGenGraduate: rng.nextBoolean(0.7),
+      hasInternet: rng.nextBoolean(0.3),
+      hasMobile: rng.nextBoolean(0.7),
+      mobileType: rng.nextBoolean(0.4) ? 'basic' : 'smartphone',
+      loginAttempts: rng.nextInt(0, 3),
+      counsellorContactAttempts: rng.nextInt(3, 8),
+      quizScore: rng.nextInt(10, 35),
+    };
+  }
+
+  return {
+    firstWeekAttendance: rng.nextInt(60, 100),
+    distanceFromCentreKm: rng.nextInt(1, 4),
+    isFirstGenGraduate: rng.nextBoolean(0.5),
+    hasInternet: rng.nextBoolean(0.6),
+    hasMobile: true,
+    mobileType: rng.nextBoolean(0.7) ? 'smartphone' : 'basic',
+    loginAttempts: rng.nextInt(5, 20),
+    counsellorContactAttempts: rng.nextInt(0, 3),
+    quizScore: rng.nextInt(45, 95),
+  };
+}
+
+/**
+ * Generate engagement data using seeded RNG
+ */
+function generateSeededEngagementData(rng: SeededRandom, riskLevel: string): EngagementRecord[] {
+  const channelIndex = rng.nextInt(0, ENGAGEMENT_CHANNELS.length - 1);
+  const channelConfig = ENGAGEMENT_CHANNELS[channelIndex];
+  const preferredChannel = channelConfig.channel;
+
+  const riskMultiplier = {
+    low: 1.1,
+    medium: 0.9,
+    high: 0.6,
+    critical: 0.3,
+  }[riskLevel] || 1;
+
+  const adjustedResponseRate = Math.min(channelConfig.responseRate * riskMultiplier, 1);
+  const totalAttempts = rng.nextInt(3, 12);
+  const successfulContacts = Math.round(totalAttempts * adjustedResponseRate);
+
+  const records: EngagementRecord[] = [
+    {
+      channel: preferredChannel,
+      totalAttempts,
+      successfulContacts,
+      lastContactDate: new Date(Date.now() - rng.nextInt(1, 7) * 24 * 60 * 60 * 1000).toISOString(),
+      outcome: successfulContacts / totalAttempts > 0.5 ? 'positive' :
+               successfulContacts > 0 ? 'neutral' : 'no_response',
+    },
+  ];
+
+  if (rng.nextBoolean(0.6)) {
+    const secondaryChannels = ENGAGEMENT_CHANNELS.filter(c => c.channel !== preferredChannel);
+    const secondaryChannel = secondaryChannels[rng.nextInt(0, secondaryChannels.length - 1)];
+    const secAttempts = rng.nextInt(1, 5);
+    const secSuccess = Math.round(secAttempts * secondaryChannel.responseRate * riskMultiplier);
+
+    records.push({
+      channel: secondaryChannel.channel,
+      totalAttempts: secAttempts,
+      successfulContacts: secSuccess,
+      lastContactDate: new Date(Date.now() - rng.nextInt(8, 14) * 24 * 60 * 60 * 1000).toISOString(),
+      outcome: secSuccess / secAttempts > 0.5 ? 'positive' :
+               secSuccess > 0 ? 'neutral' : 'no_response',
+    });
+  }
+
+  return records;
+}
+
+/**
+ * Generate a single mock extended student using SEEDED random for consistency
+ * The same index will ALWAYS produce the same student data
  */
 export function generateMockStudent(index: number): StudentExtended {
-  const isFemale = Math.random() > 0.45;
+  // Use index as seed - same index = same student every time
+  const rng = new SeededRandom(index * 12345 + 67890);
+
+  const isFemale = rng.nextBoolean(0.55);
   const gender = isFemale ? 'Female' : 'Male';
-  const firstName = randomElement(isFemale ? FIRST_NAMES_FEMALE : FIRST_NAMES_MALE);
-  const lastName = randomElement(LAST_NAMES);
+  const firstName = rng.nextElement(isFemale ? FIRST_NAMES_FEMALE : FIRST_NAMES_MALE);
+  const lastName = rng.nextElement(LAST_NAMES);
   const name = `${firstName} ${lastName}`;
 
-  const isHighRisk = Math.random() < 0.2; // 20% high-risk
-  const riskFactors = generateRiskFactors(isHighRisk);
+  const isHighRisk = rng.nextBoolean(0.2); // 20% high-risk
+  const riskFactors = generateSeededRiskFactors(rng, isHighRisk);
   const riskScore = calculateRiskScore(riskFactors);
-  const centre = randomElement(CENTRES);
+  const centre = rng.nextElement(CENTRES);
 
-  const skills = randomElements(SKILLS_POOL, randomInt(2, 5));
-  const aspirations = randomElements(ASPIRATIONS_POOL, randomInt(1, 3));
+  const skills = rng.nextElements(SKILLS_POOL, rng.nextInt(2, 5));
+  const aspirations = rng.nextElements(ASPIRATIONS_POOL, rng.nextInt(1, 3));
 
-  const engagementData = generateEngagementData(riskScore.riskLevel);
+  const engagementData = generateSeededEngagementData(rng, riskScore.riskLevel);
   const preferredChannel = engagementData[0]?.channel || 'whatsapp';
+
+  // Seeded referral source selection
+  const referralIndex = rng.nextInt(0, REFERRAL_SOURCES.length - 1);
+  const referralSource = REFERRAL_SOURCES[referralIndex].source;
+
+  // Seeded pipeline stage selection
+  const stageIndex = rng.nextInt(0, PIPELINE_STAGES.length - 1);
+  const pipelineStage = PIPELINE_STAGES[stageIndex].stage;
+
+  const age = rng.nextInt(18, 28);
+  const phonePrefix = rng.nextInt(70000, 99999);
+  const phoneSuffix = rng.nextInt(10000, 99999);
 
   return {
     id: `STU${String(index + 1).padStart(4, '0')}`,
     name,
-    age: String(randomInt(18, 28)),
+    age: String(age),
     gender,
-    contact_phone: `+91 ${randomInt(70000, 99999)}${randomInt(10000, 99999)}`,
+    contact_phone: `+91 ${phonePrefix}${phoneSuffix}`,
     contact_email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@email.com`,
-    education_level: randomElement(EDUCATION_LEVELS),
-    status: randomElement(['Active', 'Matched', 'Placed', 'Onboarding'] as const),
+    education_level: rng.nextElement(EDUCATION_LEVELS),
+    status: rng.nextElement(['Active', 'Matched', 'Placed', 'Onboarding'] as const),
     skills: skills.join(', '),
     aspirations: aspirations.join(', '),
-    enrolled_date: generateRandomDate(180),
-    counsellor_id: `CNSL${String(randomInt(1, 5)).padStart(3, '0')}`,
-    pipelineStage: getWeightedPipelineStage(),
+    enrolled_date: new Date(Date.now() - rng.nextInt(1, 180) * 24 * 60 * 60 * 1000).toISOString(),
+    counsellor_id: `CNSL${String(rng.nextInt(1, 5)).padStart(3, '0')}`,
+    pipelineStage,
     riskFactors,
     riskScore,
-    lastLoginDate: generateRandomDate(14),
-    lastCounsellorContact: generateRandomDate(7),
+    lastLoginDate: new Date(Date.now() - rng.nextInt(1, 14) * 24 * 60 * 60 * 1000).toISOString(),
+    lastCounsellorContact: new Date(Date.now() - rng.nextInt(1, 7) * 24 * 60 * 60 * 1000).toISOString(),
     centreId: centre.id,
     centreName: centre.name,
     engagementData,
     preferredChannel,
+    referralSource,
   };
 }
 
@@ -337,8 +510,8 @@ function createAtRiskSampleCandidates(): StudentExtended[] {
   });
 
   const sampleCandidates: StudentExtended[] = [
-    // Candidate 1: DISTANCE FROM CENTRE dominant (Student Onboarding)
-    // Only this candidate should show "Far from centre" indicator (10km+ is concerning)
+    // Candidate 1: DISTANCE FROM CENTRE dominant (Enrollment stage - where distance matters)
+    // Far from centre indicator only shows for Enrollment stage (max 9km)
     {
       id: 'STU0001',
       name: 'Priya Sharma',
@@ -352,10 +525,10 @@ function createAtRiskSampleCandidates(): StudentExtended[] {
       aspirations: 'IT Professional',
       enrolled_date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
       counsellor_id: 'CNSL001',
-      pipelineStage: 'Student Onboarding',
+      pipelineStage: 'Enrollment',  // Changed to Enrollment stage where distance matters
       ...createRiskFactors({
         firstWeekAttendance: 52,          // Just above 50% (~12 pts)
-        distanceFromCentreKm: 18,         // DOMINANT: Far from centre - 10km+ (~15 pts max)
+        distanceFromCentreKm: 9,          // DOMINANT: Far from centre - max 9km
         isFirstGenGraduate: true,         // +10 pts
         hasInternet: false,               // +10 pts
         hasMobile: true,
@@ -372,10 +545,11 @@ function createAtRiskSampleCandidates(): StudentExtended[] {
         { channel: 'phone', totalAttempts: 8, successfulContacts: 3, outcome: 'neutral', lastContactDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() },
       ],
       preferredChannel: 'phone',
+      referralSource: 'social_media',  // Lower commitment source
     },
 
     // Candidate 2: NO MOBILE & INTERNET dominant (Counselling)
-    // Distance is low - should NOT show "Far from centre"
+    // Distance is low - should NOT show "Far from centre" (not in Enrollment stage)
     {
       id: 'STU0002',
       name: 'Rajesh Kumar',
@@ -392,7 +566,7 @@ function createAtRiskSampleCandidates(): StudentExtended[] {
       pipelineStage: 'Counselling',
       ...createRiskFactors({
         firstWeekAttendance: 55,          // Above 50% (~11 pts)
-        distanceFromCentreKm: 8,          // Close - NO "far" indicator (~4 pts)
+        distanceFromCentreKm: 8,          // Not shown (not in Enrollment stage)
         isFirstGenGraduate: true,         // +10 pts
         hasInternet: false,               // DOMINANT: No internet (+10 pts)
         hasMobile: false,                 // DOMINANT: No mobile (+10 pts)
@@ -409,10 +583,11 @@ function createAtRiskSampleCandidates(): StudentExtended[] {
         { channel: 'in_person', totalAttempts: 5, successfulContacts: 4, outcome: 'positive', lastContactDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
       ],
       preferredChannel: 'in_person',
+      referralSource: 'community',  // Community outreach
     },
 
-    // Candidate 3: LOW FIRST WEEK ATTENDANCE dominant (Training)
-    // Distance is moderate - should NOT show "Far from centre"
+    // Candidate 3: LOW FIRST WEEK ATTENDANCE dominant (Training stage - where attendance matters)
+    // Distance not shown (not in Enrollment stage)
     {
       id: 'STU0003',
       name: 'Meera Patel',
@@ -428,8 +603,8 @@ function createAtRiskSampleCandidates(): StudentExtended[] {
       counsellor_id: 'CNSL001',
       pipelineStage: 'Training',
       ...createRiskFactors({
-        firstWeekAttendance: 15,          // DOMINANT: Very low attendance (~21 pts)
-        distanceFromCentreKm: 6,          // Close - NO "far" indicator (~3 pts)
+        firstWeekAttendance: 15,          // DOMINANT: Very low attendance (Training stage)
+        distanceFromCentreKm: 6,          // Not shown (not in Enrollment stage)
         isFirstGenGraduate: true,         // +10 pts
         hasInternet: false,               // +10 pts
         hasMobile: true,
@@ -447,10 +622,11 @@ function createAtRiskSampleCandidates(): StudentExtended[] {
         { channel: 'phone', totalAttempts: 3, successfulContacts: 1, outcome: 'no_response', lastContactDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
       ],
       preferredChannel: 'whatsapp',
+      referralSource: 'word_of_mouth',  // Friends/family recommendation
     },
 
-    // Candidate 4: POOR QUIZ SCORES dominant (Enrollment)
-    // Distance is low - should NOT show "Far from centre" (under 10km)
+    // Candidate 4: POOR QUIZ SCORES dominant (Training stage - where quiz scores matter)
+    // Distance not shown (not in Enrollment stage)
     {
       id: 'STU0004',
       name: 'Amit Singh',
@@ -464,17 +640,17 @@ function createAtRiskSampleCandidates(): StudentExtended[] {
       aspirations: 'Retail Manager',
       enrolled_date: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
       counsellor_id: 'CNSL003',
-      pipelineStage: 'Enrollment',
+      pipelineStage: 'Training',  // Changed to Training stage where quiz scores matter
       ...createRiskFactors({
         firstWeekAttendance: 58,          // Above 50% (~10 pts)
-        distanceFromCentreKm: 5,          // Close - NO "far" indicator (~7 pts)
+        distanceFromCentreKm: 5,          // Not shown (not in Enrollment stage)
         isFirstGenGraduate: true,         // +10 pts
         hasInternet: false,               // +10 pts
         hasMobile: true,
         mobileType: 'basic',              // +5 pts
         loginAttempts: 2,                 // Low (~8 pts)
         counsellorContactAttempts: 3,     // Moderate (~6 pts)
-        quizScore: 12,                    // DOMINANT: Very poor quiz score (~7 pts)
+        quizScore: 12,                    // DOMINANT: Very poor quiz score (Training stage)
       }),
       lastLoginDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
       lastCounsellorContact: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
@@ -484,10 +660,11 @@ function createAtRiskSampleCandidates(): StudentExtended[] {
         { channel: 'sms', totalAttempts: 6, successfulContacts: 2, outcome: 'neutral', lastContactDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
       ],
       preferredChannel: 'sms',
+      referralSource: 'government',  // Government scheme referral
     },
 
-    // Candidate 5: HIGH COUNSELLOR CONTACT ATTEMPTS - Student Unresponsive (Training)
-    // Distance is low - should NOT show "Far from centre" (under 10km)
+    // Candidate 5: HIGH COUNSELLOR CONTACT ATTEMPTS - Student Unresponsive (Counselling)
+    // Unresponsive applies to all stages
     {
       id: 'STU0005',
       name: 'Deepa Reddy',
@@ -501,16 +678,16 @@ function createAtRiskSampleCandidates(): StudentExtended[] {
       aspirations: 'Hospitality Expert',
       enrolled_date: new Date(Date.now() - 50 * 24 * 60 * 60 * 1000).toISOString(),
       counsellor_id: 'CNSL002',
-      pipelineStage: 'Training',
+      pipelineStage: 'Counselling',  // Changed - unresponsive applies to all stages
       ...createRiskFactors({
         firstWeekAttendance: 55,          // Above 50% (~11 pts)
-        distanceFromCentreKm: 7,          // Close - NO "far" indicator (~10 pts)
+        distanceFromCentreKm: 7,          // Not shown (not in Enrollment stage)
         isFirstGenGraduate: true,         // +10 pts
         hasInternet: false,               // +10 pts
         hasMobile: true,
         mobileType: 'basic',              // +5 pts
         loginAttempts: 2,                 // Low (~8 pts)
-        counsellorContactAttempts: 9,     // DOMINANT: Student unresponsive (~10 pts)
+        counsellorContactAttempts: 9,     // DOMINANT: Student unresponsive (all stages)
         quizScore: 42,                    // Above threshold (~0 pts)
       }),
       lastLoginDate: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
@@ -522,6 +699,7 @@ function createAtRiskSampleCandidates(): StudentExtended[] {
         { channel: 'phone', totalAttempts: 9, successfulContacts: 1, outcome: 'no_response', lastContactDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
       ],
       preferredChannel: 'whatsapp',
+      referralSource: 'self_discovery',  // Walk-in
     },
   ];
 
@@ -624,4 +802,106 @@ export function getEngagementChannelStats(students: StudentExtended[]): Engageme
       averageResponseTime: Math.round(avgResponseTime * 10) / 10,
     };
   }).sort((a, b) => b.responseRate - a.responseRate); // Sort by response rate
+}
+
+/**
+ * Calculate referral source statistics from students
+ * Shows which referral sources result in better outcomes
+ * Alumni referrals should show the best retention, followed by word_of_mouth (referred by friend)
+ */
+export function getReferralSourceStats(students: StudentExtended[]): ReferralSourceStats[] {
+  const allSources: ReferralSource[] = [
+    'alumni', 'community', 'school', 'social_media',
+    'ngo_partner', 'government', 'word_of_mouth', 'self_discovery'
+  ];
+
+  // Retention bonuses by source - reflects real-world patterns
+  // Alumni referrals have highest retention, followed by friend referrals
+  const retentionBonus: Record<ReferralSource, number> = {
+    alumni: 15,           // Best retention - trusted recommendation from program graduates
+    word_of_mouth: 10,    // Second best - referred by friends/family
+    ngo_partner: 5,       // Pre-screened candidates
+    community: 3,         // Local connection
+    school: 2,            // Institutional support
+    government: 0,        // Scheme referrals - baseline
+    social_media: -3,     // Lower commitment
+    self_discovery: -5,   // Walk-ins - lowest retention
+  };
+
+  const sourceMap = new Map<ReferralSource, {
+    students: StudentExtended[];
+    placedCount: number;
+    droppedCount: number;
+    totalRiskScore: number;
+  }>();
+
+  // Initialize all sources
+  allSources.forEach(source => {
+    sourceMap.set(source, {
+      students: [],
+      placedCount: 0,
+      droppedCount: 0,
+      totalRiskScore: 0,
+    });
+  });
+
+  // Aggregate data from students
+  students.forEach(student => {
+    const source = student.referralSource || 'self_discovery';
+    const stats = sourceMap.get(source)!;
+
+    stats.students.push(student);
+    stats.totalRiskScore += student.riskScore.totalScore;
+
+    // Count placements (Post Placement stage)
+    if (student.pipelineStage === 'Post Placement') {
+      stats.placedCount++;
+    }
+
+    // Count dropouts (high risk + no recent activity)
+    if (student.riskScore.riskLevel === 'critical') {
+      stats.droppedCount++;
+    }
+  });
+
+  // Convert to array of stats with quality score calculation
+  return allSources.map(source => {
+    const stats = sourceMap.get(source)!;
+    const totalStudents = stats.students.length;
+
+    if (totalStudents === 0) {
+      return {
+        source,
+        totalStudents: 0,
+        placedCount: 0,
+        placementRate: 0,
+        avgRiskScore: 0,
+        retentionRate: 100,
+        qualityScore: 0,
+      };
+    }
+
+    const placementRate = (stats.placedCount / totalStudents) * 100;
+    const avgRiskScore = stats.totalRiskScore / totalStudents;
+    // Apply source-specific retention bonus for realistic outcomes
+    const baseRetention = ((totalStudents - stats.droppedCount) / totalStudents) * 100;
+    const retentionRate = Math.min(Math.max(baseRetention + retentionBonus[source], 0), 100);
+
+    // Quality score: weighted combination of placement rate, retention, and inverse risk
+    const qualityScore = Math.round(
+      (placementRate * 0.4) +           // 40% weight on placements
+      (retentionRate * 0.35) +          // 35% weight on retention
+      ((100 - avgRiskScore) * 0.25)     // 25% weight on low risk
+    );
+
+    return {
+      source,
+      totalStudents,
+      placedCount: stats.placedCount,
+      placementRate: Math.round(placementRate * 10) / 10,
+      avgRiskScore: Math.round(avgRiskScore * 10) / 10,
+      retentionRate: Math.round(retentionRate * 10) / 10,
+      qualityScore: Math.min(qualityScore, 100), // Cap at 100
+    };
+  }).sort((a, b) => b.retentionRate - a.retentionRate); // Sort by retention rate (best first)
 }
