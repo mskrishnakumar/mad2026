@@ -141,3 +141,83 @@ export interface StudentProgress {
   activityType: 'call' | 'meeting' | 'followup' | 'note';
   notes: string;
 }
+
+// ===== COUNSELLOR DASHBOARD TYPES =====
+
+// Pipeline Stages for student journey tracking
+export type PipelineStage =
+  | 'Student Onboarding'
+  | 'Counselling'
+  | 'Enrollment'
+  | 'Training'
+  | 'Pre-placement'
+  | 'Post Placement';
+
+// Risk Factors tracked for dropout prediction
+export interface RiskFactors {
+  firstWeekAttendance: number;        // 0-100 percentage
+  distanceFromCentreKm: number;       // in kilometers
+  isFirstGenGraduate: boolean;        // true if first generation college student
+  hasInternet: boolean;               // internet access at home
+  hasMobile: boolean;                 // mobile phone access
+  mobileType: 'smartphone' | 'basic' | '';
+  loginAttempts: number;              // count in last 30 days
+  counsellorContactAttempts: number;  // how many times counsellor tried to reach
+}
+
+// Breakdown of risk score components
+export interface RiskScoreBreakdown {
+  attendanceRisk: number;             // 0-25 points
+  distanceRisk: number;               // 0-15 points
+  firstGenRisk: number;               // 0-15 points
+  connectivityRisk: number;           // 0-20 points
+  engagementRisk: number;             // 0-15 points
+  contactRisk: number;                // 0-10 points
+}
+
+// Computed Risk Score
+export interface RiskScore {
+  totalScore: number;                 // 0-100 (higher = more at risk)
+  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  breakdown: RiskScoreBreakdown;
+  lastCalculated: string;             // ISO date
+}
+
+// Alert for counsellor about at-risk students
+export interface StudentAlert {
+  id: string;
+  studentId: string;
+  studentName: string;
+  type: 'high_risk' | 'dropout_warning' | 'missed_session' | 'no_login';
+  message: string;
+  severity: 'warning' | 'critical';
+  createdAt: string;
+  isRead: boolean;
+  acknowledgedAt?: string;
+}
+
+// Extended Student with pipeline stage and risk scoring
+export interface StudentExtended extends Student {
+  pipelineStage: PipelineStage;
+  riskFactors: RiskFactors;
+  riskScore: RiskScore;
+  lastLoginDate?: string;
+  lastCounsellorContact?: string;
+  centreId: string;
+  centreName: string;
+}
+
+// Extended Dashboard Statistics
+export interface DashboardStatsExtended {
+  total: number;
+  byPipelineStage: Record<PipelineStage, number>;
+  byRiskLevel: {
+    low: number;
+    medium: number;
+    high: number;
+    critical: number;
+  };
+  atRiskCount: number;        // students with score > 70
+  activeAlerts: number;
+  placementRate: number;      // percentage of students placed
+}

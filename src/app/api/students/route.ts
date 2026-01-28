@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import * as tableService from '@/services/studentTableService';
 import * as csvService from '@/services/studentService';
+import * as dashboardService from '@/services/dashboardService';
+import type { PipelineStage } from '@/lib/types/data';
 
 const DATA_SOURCE = process.env.DATA_SOURCE || 'local';
 
@@ -11,8 +13,19 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const search = searchParams.get('search');
   const stats = searchParams.get('stats');
+  const extended = searchParams.get('extended');
+  const atRisk = searchParams.get('atRisk');
+  const pipelineStage = searchParams.get('pipelineStage');
+  const limit = searchParams.get('limit');
 
   try {
+    // Extended dashboard stats
+    if (stats === 'extended') {
+      const extendedStats = await dashboardService.getDashboardStats();
+      return NextResponse.json(extendedStats);
+    }
+
+    // Regular stats (existing)
     if (stats === 'true') {
       const studentStats = useTableStorage
         ? await tableService.getStudentStats()
@@ -20,6 +33,32 @@ export async function GET(request: Request) {
       return NextResponse.json(studentStats);
     }
 
+    // At-risk students only
+    if (atRisk === 'true') {
+      const limitNum = limit ? parseInt(limit, 10) : undefined;
+      const atRiskStudents = await dashboardService.getAtRiskStudents(limitNum);
+      return NextResponse.json(atRiskStudents);
+    }
+
+    // Filter by pipeline stage
+    if (pipelineStage) {
+      const stageStudents = await dashboardService.getStudentsByPipelineStage(
+        pipelineStage as PipelineStage
+      );
+      return NextResponse.json(stageStudents);
+    }
+
+    // Extended student data with risk scores
+    if (extended === 'true') {
+      if (search) {
+        const students = await dashboardService.searchStudents(search);
+        return NextResponse.json(students);
+      }
+      const extendedStudents = await dashboardService.getExtendedStudents();
+      return NextResponse.json(extendedStudents);
+    }
+
+    // Regular search (existing)
     if (search) {
       const students = useTableStorage
         ? await tableService.searchStudents(search)
@@ -27,6 +66,7 @@ export async function GET(request: Request) {
       return NextResponse.json(students);
     }
 
+    // Default: return all students
     const students = useTableStorage
       ? await tableService.getAllStudents()
       : await csvService.getStudents();
