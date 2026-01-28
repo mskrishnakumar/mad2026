@@ -1,6 +1,6 @@
 # Azure Translator Service Setup
 
-This application uses Azure Translator Service to provide multilingual support for Telugu, Hindi, Tamil, and English on the home page.
+This application uses Azure Translator Service to provide multilingual support for Telugu, Hindi, Tamil, Marathi, and English on the home page.
 
 ## Features
 
@@ -10,6 +10,7 @@ This application uses Azure Translator Service to provide multilingual support f
   - Telugu (తెలుగు)
   - Hindi (हिन्दी)
   - Tamil (தமிழ்)
+  - Marathi (मराठी)
 - **Smart Caching**: Translations are cached in memory to reduce API calls
 - **Persistent Preference**: Language selection is saved to localStorage
 
