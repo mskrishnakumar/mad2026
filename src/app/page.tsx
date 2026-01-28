@@ -94,8 +94,22 @@ export default function Home() {
       <div className="w-full border-b border-gray-100 bg-white/80 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-teal-500 via-emerald-500 to-cyan-500 rounded-lg flex items-center justify-center">
-              <span className="text-sm font-bold text-white">MP</span>
+            <div className="w-8 h-8 bg-gradient-to-br from-teal-500 via-emerald-500 to-cyan-500 rounded-lg flex items-center justify-center p-1">
+              <svg viewBox="0 0 24 24" fill="none" className="w-full h-full">
+                {/* 5 hands reaching to center */}
+                <circle cx="12" cy="12" r="3" fill="white" opacity="0.9"/>
+                <path d="M12 2 L12 6 M12 9 L12 12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M20.5 7.5 L17.5 9.5 M15.5 10.5 L12 12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M20.5 16.5 L17.5 14.5 M15.5 13.5 L12 12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M3.5 7.5 L6.5 9.5 M8.5 10.5 L12 12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M3.5 16.5 L6.5 14.5 M8.5 13.5 L12 12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                {/* Hand shapes at the ends */}
+                <circle cx="12" cy="2" r="1.5" fill="white"/>
+                <circle cx="20.5" cy="7.5" r="1.5" fill="white"/>
+                <circle cx="20.5" cy="16.5" r="1.5" fill="white"/>
+                <circle cx="3.5" cy="7.5" r="1.5" fill="white"/>
+                <circle cx="3.5" cy="16.5" r="1.5" fill="white"/>
+              </svg>
             </div>
             <span className="text-sm font-semibold text-gray-700">Mission Possible</span>
           </div>
@@ -135,10 +149,24 @@ export default function Home() {
       <Container className="py-16">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          {/* MP Logo */}
+          {/* Mission Possible Logo - 5 Hands Together */}
           <div className="flex justify-center mb-6">
-            <div className="w-24 h-24 bg-gradient-to-br from-teal-500 via-emerald-500 to-cyan-500 rounded-2xl shadow-lg flex items-center justify-center">
-              <span className="text-4xl font-black text-white tracking-tight">MP</span>
+            <div className="w-24 h-24 bg-gradient-to-br from-teal-500 via-emerald-500 to-cyan-500 rounded-2xl shadow-lg flex items-center justify-center p-3">
+              <svg viewBox="0 0 24 24" fill="none" className="w-full h-full">
+                {/* 5 hands reaching to center */}
+                <circle cx="12" cy="12" r="3" fill="white" opacity="0.9"/>
+                <path d="M12 2 L12 6 M12 9 L12 12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M20.5 7.5 L17.5 9.5 M15.5 10.5 L12 12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M20.5 16.5 L17.5 14.5 M15.5 13.5 L12 12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M3.5 7.5 L6.5 9.5 M8.5 10.5 L12 12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M3.5 16.5 L6.5 14.5 M8.5 13.5 L12 12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                {/* Hand shapes at the ends */}
+                <circle cx="12" cy="2" r="1.5" fill="white"/>
+                <circle cx="20.5" cy="7.5" r="1.5" fill="white"/>
+                <circle cx="20.5" cy="16.5" r="1.5" fill="white"/>
+                <circle cx="3.5" cy="7.5" r="1.5" fill="white"/>
+                <circle cx="3.5" cy="16.5" r="1.5" fill="white"/>
+              </svg>
             </div>
           </div>
 

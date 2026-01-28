@@ -392,8 +392,22 @@ export default function StudentRegistrationPage() {
         {/* Header */}
         <div className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 via-blue-600 to-cyan-500 rounded-xl shadow-lg flex items-center justify-center">
-              <span className="text-2xl font-black text-white">MP</span>
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 via-blue-600 to-cyan-500 rounded-xl shadow-lg flex items-center justify-center p-2">
+              <svg viewBox="0 0 24 24" fill="none" className="w-full h-full">
+                {/* 5 hands reaching to center */}
+                <circle cx="12" cy="12" r="3" fill="white" opacity="0.9"/>
+                <path d="M12 2 L12 6 M12 9 L12 12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M20.5 7.5 L17.5 9.5 M15.5 10.5 L12 12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M20.5 16.5 L17.5 14.5 M15.5 13.5 L12 12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M3.5 7.5 L6.5 9.5 M8.5 10.5 L12 12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M3.5 16.5 L6.5 14.5 M8.5 13.5 L12 12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                {/* Hand shapes at the ends */}
+                <circle cx="12" cy="2" r="1.5" fill="white"/>
+                <circle cx="20.5" cy="7.5" r="1.5" fill="white"/>
+                <circle cx="20.5" cy="16.5" r="1.5" fill="white"/>
+                <circle cx="3.5" cy="7.5" r="1.5" fill="white"/>
+                <circle cx="3.5" cy="16.5" r="1.5" fill="white"/>
+              </svg>
             </div>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Student Registration</h1>

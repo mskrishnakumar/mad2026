@@ -15,15 +15,15 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "MAD2026 - Hackathon Starter Kit",
-    template: "%s | MAD2026",
+    default: "Mission Possible - Magic Bus Upskilling Programme",
+    template: "%s | Mission Possible",
   },
-  description: "A Next.js hackathon starter kit with AI-powered chat, smart recommendations, and modern UI components.",
-  keywords: ["hackathon", "nextjs", "react", "ai", "chat", "recommendations"],
-  authors: [{ name: "MAD2026 Team" }],
+  description: "Magic Bus Upskilling Programme - Empowering youth through skills training and career development.",
+  keywords: ["magic bus", "upskilling", "youth empowerment", "skills training", "career development"],
+  authors: [{ name: "Magic Bus Team" }],
   openGraph: {
-    title: "MAD2026 - Hackathon Starter Kit",
-    description: "A Next.js hackathon starter kit with AI-powered chat, smart recommendations, and modern UI components.",
+    title: "Mission Possible - Magic Bus Upskilling Programme",
+    description: "Magic Bus Upskilling Programme - Empowering youth through skills training and career development.",
     type: "website",
   },
 };
