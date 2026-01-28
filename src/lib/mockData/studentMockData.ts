@@ -701,6 +701,83 @@ function createAtRiskSampleCandidates(): StudentExtended[] {
       preferredChannel: 'whatsapp',
       referralSource: 'self_discovery',  // Walk-in
     },
+
+    // Candidate 6: LOW PLATFORM ENGAGEMENT dominant (Pre-placement stage)
+    // Very few logins despite having connectivity - disengaged from platform
+    {
+      id: 'STU0006',
+      name: 'Vikram Yadav',
+      age: '23',
+      gender: 'Male',
+      contact_phone: '+91 43210 98765',
+      contact_email: 'vikram.yadav@email.com',
+      education_level: 'Graduate',
+      status: 'Active',
+      skills: 'Problem Solving, Team Work, Communication',
+      aspirations: 'Sales Professional',
+      enrolled_date: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+      counsellor_id: 'CNSL003',
+      pipelineStage: 'Pre-placement',  // Pre-placement stage where engagement matters
+      ...createRiskFactors({
+        firstWeekAttendance: 72,          // Decent attendance (~7 pts)
+        distanceFromCentreKm: 4,          // Close to centre (~2 pts)
+        isFirstGenGraduate: true,         // +10 pts
+        hasInternet: true,                // Has internet (0 pts)
+        hasMobile: true,
+        mobileType: 'smartphone',         // Has smartphone (0 pts)
+        loginAttempts: 1,                 // DOMINANT: Very low platform engagement (~9 pts)
+        counsellorContactAttempts: 2,     // Low (~4 pts)
+        quizScore: 38,                    // Below threshold - poor quiz (~6 pts)
+      }),
+      lastLoginDate: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
+      lastCounsellorContact: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+      centreId: 'CTR003',
+      centreName: 'Magic Bus Centre - Navi Mumbai',
+      engagementData: [
+        { channel: 'whatsapp', totalAttempts: 6, successfulContacts: 3, outcome: 'neutral', lastContactDate: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString() },
+      ],
+      preferredChannel: 'whatsapp',
+      referralSource: 'school',  // School partnership referral
+    },
+
+    // Candidate 7: BASIC PHONE + DISTANCE (Student Onboarding stage)
+    // New student with basic phone and moderate distance - digital access barrier
+    {
+      id: 'STU0007',
+      name: 'Sunita Verma',
+      age: '18',
+      gender: 'Female',
+      contact_phone: '+91 32109 87654',
+      contact_email: 'sunita.verma@email.com',
+      education_level: '10th Pass',
+      status: 'Onboarding',
+      skills: 'English Speaking, Customer Service',
+      aspirations: 'Teacher',
+      enrolled_date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+      counsellor_id: 'CNSL001',
+      pipelineStage: 'Student Onboarding',  // Early stage - onboarding
+      ...createRiskFactors({
+        firstWeekAttendance: 60,          // Moderate attendance (~10 pts)
+        distanceFromCentreKm: 7,          // Moderate distance (~10 pts)
+        isFirstGenGraduate: true,         // +10 pts
+        hasInternet: false,               // No internet (+10 pts)
+        hasMobile: true,
+        mobileType: 'basic',              // DOMINANT: Basic phone only (+5 pts)
+        loginAttempts: 2,                 // Low due to basic phone (~8 pts)
+        counsellorContactAttempts: 1,     // Low - new student (~2 pts)
+        quizScore: 55,                    // Above threshold (~0 pts)
+      }),
+      lastLoginDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      lastCounsellorContact: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      centreId: 'CTR002',
+      centreName: 'Magic Bus Centre - Thane',
+      engagementData: [
+        { channel: 'sms', totalAttempts: 4, successfulContacts: 3, outcome: 'positive', lastContactDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() },
+        { channel: 'phone', totalAttempts: 2, successfulContacts: 2, outcome: 'positive', lastContactDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
+      ],
+      preferredChannel: 'sms',
+      referralSource: 'ngo_partner',  // NGO partner referral
+    },
   ];
 
   return sampleCandidates;
@@ -712,10 +789,10 @@ let cachedAlerts: StudentAlert[] | null = null;
 
 export function getMockStudents(): StudentExtended[] {
   if (!cachedStudents) {
-    // Start with 5 hardcoded at-risk sample candidates
+    // Start with 7 hardcoded at-risk sample candidates
     const atRiskSamples = createAtRiskSampleCandidates();
-    // Generate additional random students (starting from index 5 to avoid ID conflicts)
-    const randomStudents = Array.from({ length: 55 }, (_, i) => generateMockStudent(i + 5));
+    // Generate additional random students (starting from index 7 to avoid ID conflicts)
+    const randomStudents = Array.from({ length: 53 }, (_, i) => generateMockStudent(i + 7));
     cachedStudents = [...atRiskSamples, ...randomStudents];
   }
   return cachedStudents;
