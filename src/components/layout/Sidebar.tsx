@@ -52,6 +52,7 @@ const volunteerMenuItems: SidebarItem[] = [
 const studentMenuItems: SidebarItem[] = [
   { label: 'Dashboard', href: '/student/dashboard', icon: LayoutDashboard },
   { label: 'Profile', href: '/student/profile', icon: User },
+  { label: 'Resume Builder', href: '/student/resume', icon: FileText },
   { label: 'Upskilling Programmes', href: '/student/programmes', icon: GraduationCap },
   { label: 'Job Opportunities', href: '/student/jobs', icon: Briefcase },
 ];
