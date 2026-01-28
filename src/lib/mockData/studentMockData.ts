@@ -441,7 +441,7 @@ export function generateMockStudents(count: number = 50): StudentExtended[] {
  */
 export function generateMockAlerts(students: StudentExtended[]): StudentAlert[] {
   return students
-    .filter(s => s.riskScore.totalScore >= 70)
+    .filter(s => s.riskScore.totalScore >= 65)
     .map((s, index) => ({
       id: `ALR${String(index + 1).padStart(4, '0')}`,
       studentId: s.id,

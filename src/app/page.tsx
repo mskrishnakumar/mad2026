@@ -5,7 +5,7 @@ import { Container } from '@/components/layout/Container';
 import { RoleCard } from '@/components/landing/RoleCard';
 import { LanguageSelector } from '@/components/translation/LanguageSelector';
 import { useTranslation } from '@/lib/hooks/useTranslation';
-import { GraduationCap, Heart, Quote, Phone, Mail, MapPin, ChevronDown, LogIn, ChevronLeft, ChevronRight, Construction, X, Shield } from 'lucide-react';
+import { GraduationCap, Heart, Quote, Phone, Mail, MapPin, LogIn, ChevronLeft, ChevronRight, Construction, X, Shield } from 'lucide-react';
 import Image from 'next/image';
 
 const testimonials = [
@@ -47,7 +47,6 @@ const testimonials = [
 ];
 
 export default function Home() {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showAdminModal, setShowAdminModal] = useState(false);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -61,9 +60,13 @@ export default function Home() {
     volunteerTitle: 'I\'m a Volunteer',
     volunteerDesc: 'Support students post-placement as a mentor and help them succeed in their new careers.',
     tagline: 'Make a Difference, One Step at a Time',
-    initiative: 'A Magic Bus Initiative',
-    builtBy: 'Built by Barclays volunteers for Hack-a-Difference 2026',
+    builtBy: 'Built by Barclays volunteers for Make a Difference 2026, in partnership with MagicBus',
+    successStories: 'Success Stories',
+    successStoriesDesc: 'Hear from students who transformed their lives through Lifeskills',
   });
+
+  // Translated testimonials state
+  const [translatedTestimonials, setTranslatedTestimonials] = useState(testimonials);
 
   // Auto-scroll testimonials
   useEffect(() => {
@@ -104,8 +107,9 @@ export default function Home() {
           volunteerTitle: 'I\'m a Volunteer',
           volunteerDesc: 'Support students post-placement as a mentor and help them succeed in their new careers.',
           tagline: 'Make a Difference, One Step at a Time',
-          initiative: 'A Magic Bus Initiative',
-          builtBy: 'Built by Barclays volunteers for Hack-a-Difference 2026',
+          builtBy: 'Built by Barclays volunteers for Make a Difference 2026, in partnership with MagicBus',
+          successStories: 'Success Stories',
+          successStoriesDesc: 'Hear from students who transformed their lives through Lifeskills',
         };
         const translatedEntries = await Promise.all(
           keys.map(async (key) => {
@@ -114,6 +118,15 @@ export default function Home() {
           })
         );
         setTranslations(Object.fromEntries(translatedEntries) as typeof translations);
+
+        // Translate testimonials
+        const translatedTestimonialsData = await Promise.all(
+          testimonials.map(async (testimonial) => ({
+            ...testimonial,
+            quote: await translateText(testimonial.quote, currentLanguage),
+          }))
+        );
+        setTranslatedTestimonials(translatedTestimonialsData);
       };
       translateAll();
     } else {
@@ -126,25 +139,16 @@ export default function Home() {
         volunteerTitle: 'I\'m a Volunteer',
         volunteerDesc: 'Support students post-placement as a mentor and help them succeed in their new careers.',
         tagline: 'Make a Difference, One Step at a Time',
-        initiative: 'A Magic Bus Initiative',
-        builtBy: 'Built by Barclays volunteers for Hack-a-Difference 2026',
+        builtBy: 'Built by Barclays volunteers for Make a Difference 2026, in partnership with MagicBus',
+        successStories: 'Success Stories',
+        successStoriesDesc: 'Hear from students who transformed their lives through Lifeskills',
       });
+      setTranslatedTestimonials(testimonials);
     }
   }, [currentLanguage, translateText]);
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      {/* Barclays Hackathon Banner - Moved to top */}
-      <div className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-2">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <p className="text-sm font-medium flex items-center justify-center gap-2">
-            <span className="hidden sm:inline">🏆</span>
-            {translations.builtBy}
-            <span className="hidden sm:inline">🏆</span>
-          </p>
-        </div>
-      </div>
-
       {/* Top Navigation Bar */}
       <div className="w-full border-b border-gray-100 bg-white/80 backdrop-blur-sm sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
@@ -165,33 +169,14 @@ export default function Home() {
             {/* Language Selector */}
             <LanguageSelector currentLanguage={currentLanguage} onLanguageChange={changeLanguage} />
 
-            {/* Admin Login Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                onBlur={() => setTimeout(() => setIsDropdownOpen(false), 150)}
-                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
-              >
-                <LogIn className="w-4 h-4" />
-                <span className="hidden sm:inline">Admin</span>
-                <ChevronDown className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {isDropdownOpen && (
-                <div className="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
-                  <button
-                    onClick={() => {
-                      setIsDropdownOpen(false);
-                      setShowAdminModal(true);
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-teal-50 hover:text-teal-700 transition-colors w-full"
-                  >
-                    <span className="w-2 h-2 bg-teal-500 rounded-full"></span>
-                    Magic Bus Admin
-                  </button>
-                </div>
-              )}
-            </div>
+            {/* Admin Login Button */}
+            <button
+              onClick={() => setShowAdminModal(true)}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+            >
+              <LogIn className="w-4 h-4" />
+              <span className="hidden sm:inline">Admin</span>
+            </button>
           </div>
         </div>
       </div>
@@ -225,8 +210,13 @@ export default function Home() {
             "{translations.tagline}"
           </p>
 
-          <p className="text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto mb-2 px-4">
+          <p className="text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto mb-3 px-4">
             {translations.subtitle}
+          </p>
+
+          {/* Built by Barclays */}
+          <p className="text-sm text-gray-500 font-medium">
+            {translations.builtBy}
           </p>
         </div>
 
@@ -251,8 +241,8 @@ export default function Home() {
         {/* Testimonials Section - Horizontal Scroll */}
         <div className="mb-14 sm:mb-16">
           <div className="text-center mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Success Stories</h2>
-            <p className="text-muted-foreground">Hear from students who transformed their lives through Lifeskills</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{translations.successStories}</h2>
+            <p className="text-muted-foreground">{translations.successStoriesDesc}</p>
           </div>
 
           {/* Carousel Container */}
@@ -279,7 +269,7 @@ export default function Home() {
               className="flex gap-5 overflow-x-auto scrollbar-hide scroll-smooth pb-4 px-2"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
-              {testimonials.map((testimonial, index) => (
+              {translatedTestimonials.map((testimonial, index) => (
                 <div
                   key={index}
                   className={`flex-shrink-0 w-[300px] bg-white rounded-xl p-6 shadow-sm border-2 transition-all duration-300 ${
@@ -304,7 +294,7 @@ export default function Home() {
 
             {/* Pagination Dots */}
             <div className="flex justify-center gap-2 mt-4">
-              {testimonials.map((_, index) => (
+              {translatedTestimonials.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentTestimonial(index)}
@@ -365,25 +355,19 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Footer with Tagline */}
-        <div className="text-center mb-6">
-          <p className="text-base font-medium text-gray-600">
-            {translations.initiative}
-          </p>
-        </div>
       </Container>
 
       {/* Beta/Under Construction Banner */}
-      <div className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3">
+      <div className="w-full bg-gradient-to-r from-slate-100 to-gray-100 text-gray-600 py-3 border-t border-gray-200">
         <div className="max-w-6xl mx-auto px-4 text-center">
           <div className="flex items-center justify-center gap-2">
-            <Construction className="w-5 h-5" />
+            <Construction className="w-4 h-4 text-gray-500" />
             <p className="text-sm font-medium">
-              Beta Version - Under Active Development
+              Beta Version - Under Active Construction
             </p>
-            <Construction className="w-5 h-5" />
+            <Construction className="w-4 h-4 text-gray-500" />
           </div>
-          <p className="text-xs opacity-90 mt-1">
+          <p className="text-xs text-gray-500 mt-1">
             We're continuously improving. Your feedback helps us serve students better!
           </p>
         </div>

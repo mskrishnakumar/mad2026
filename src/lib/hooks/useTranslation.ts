@@ -47,7 +47,6 @@ export function useTranslation() {
         });
 
         if (!response.ok) {
-          console.error('Translation failed');
           return text; // Fallback to original text
         }
 
@@ -64,8 +63,7 @@ export function useTranslation() {
         }));
 
         return translatedText;
-      } catch (error) {
-        console.error('Translation error:', error);
+      } catch {
         return text; // Fallback to original text
       } finally {
         setIsTranslating(false);

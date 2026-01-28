@@ -4,7 +4,7 @@ import { Users, AlertTriangle, TrendingUp, Bell, UserCheck, GraduationCap } from
 import { StatsCard, StatsCardSkeleton } from './StatsCard';
 import { PipelineChart } from './PipelineChart';
 import { RiskDistributionChart } from './RiskDistributionChart';
-import { EngagementChannelChart } from './EngagementChannelChart';
+import { ReferralSourceChart } from './ReferralSourceChart';
 import type { DashboardStatsExtended } from '@/lib/types/data';
 
 interface DashboardCardsProps {
@@ -97,10 +97,10 @@ export function DashboardCards({ stats, loading }: DashboardCardsProps) {
         <RiskDistributionChart data={stats.byRiskLevel} total={stats.total} />
       </div>
 
-      {/* Engagement Channel Analytics */}
-      {stats.byEngagementChannel && stats.byEngagementChannel.length > 0 && (
+      {/* Referral Source Analytics */}
+      {stats.byReferralSource && stats.byReferralSource.length > 0 && (
         <div className="grid gap-6 lg:grid-cols-1">
-          <EngagementChannelChart data={stats.byEngagementChannel} total={stats.total} />
+          <ReferralSourceChart data={stats.byReferralSource} total={stats.total} />
         </div>
       )}
 

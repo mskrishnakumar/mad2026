@@ -15,10 +15,10 @@ export const WEIGHTS = {
 // Risk thresholds for categorization
 export const THRESHOLDS = {
   LOW_MAX: 39,           // 0-39 = Low risk
-  MEDIUM_MAX: 69,        // 40-69 = Medium risk
-  HIGH_MAX: 84,          // 70-84 = High risk (red flag)
+  MEDIUM_MAX: 64,        // 40-64 = Medium risk
+  HIGH_MAX: 84,          // 65-84 = High risk (red flag)
   CRITICAL_MIN: 85,      // 85-100 = Critical risk
-  HIGH_RISK_SCORE: 70,   // Alert threshold
+  HIGH_RISK_SCORE: 65,   // Alert threshold
   MAX_DISTANCE_KM: 10,   // Distance beyond which max risk applies (10km is high enough to dropout)
   MIN_LOGINS_EXPECTED: 10,  // Expected logins per 30 days
   MAX_CONTACT_ATTEMPTS: 5,  // Contact attempts before max concern (student unresponsive)
@@ -121,7 +121,7 @@ export function calculateRiskScore(factors: RiskFactors): RiskScore {
 /**
  * Check if a student is considered at-risk based on score
  * @param score - The risk score (0-100)
- * @returns true if score exceeds high risk threshold (70)
+ * @returns true if score exceeds high risk threshold (65)
  */
 export function isAtRisk(score: number): boolean {
   return score >= THRESHOLDS.HIGH_RISK_SCORE;

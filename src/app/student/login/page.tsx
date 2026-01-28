@@ -173,7 +173,7 @@ export default function StudentLoginPage() {
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
-                Sign In
+                Existing User?
               </button>
               <button
                 onClick={() => {
@@ -186,7 +186,7 @@ export default function StudentLoginPage() {
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
-                Sign Up
+                New User?
               </button>
             </div>
 

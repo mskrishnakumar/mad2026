@@ -8,6 +8,7 @@ import {
   getPipelineDistribution,
   getRiskDistribution,
   getEngagementChannelStats,
+  getReferralSourceStats,
 } from '@/lib/mockData/studentMockData';
 import { THRESHOLDS } from '@/lib/utils/riskCalculator';
 
@@ -40,6 +41,9 @@ export async function getDashboardStats(): Promise<DashboardStatsExtended> {
   // Calculate engagement channel statistics
   const byEngagementChannel = getEngagementChannelStats(students);
 
+  // Calculate referral source statistics
+  const byReferralSource = getReferralSourceStats(students);
+
   return {
     total: students.length,
     byPipelineStage,
@@ -48,6 +52,7 @@ export async function getDashboardStats(): Promise<DashboardStatsExtended> {
     activeAlerts,
     placementRate,
     byEngagementChannel,
+    byReferralSource,
   };
 }
 

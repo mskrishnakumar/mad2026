@@ -4,12 +4,11 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Heart, CheckCircle, Loader2, Home, Users, PhoneCall } from 'lucide-react';
+import { Heart, CheckCircle, Loader2, Home, Users, PhoneCall, FlaskConical } from 'lucide-react';
 import Link from 'next/link';
 
 interface FormData {
   name: string;
-  phone: string;
   email: string;
   organization: string;
   supportTypes: string[];
@@ -17,7 +16,6 @@ interface FormData {
 
 const initialFormData: FormData = {
   name: '',
-  phone: '',
   email: '',
   organization: '',
   supportTypes: [],
@@ -38,6 +36,32 @@ const SUPPORT_OPTIONS = [
   },
 ];
 
+// Demo profiles for quick form filling
+const DEMO_PROFILES = [
+  {
+    id: 'corporate_mentor',
+    label: 'Corporate Mentor',
+    description: 'IT professional offering mentorship',
+    data: {
+      name: 'Sunita Krishnan',
+      email: 'sunita.k@techcorp.com',
+      organization: 'TechCorp Solutions',
+      supportTypes: ['mentor_post_placement'],
+    },
+  },
+  {
+    id: 'full_support',
+    label: 'Full Support Volunteer',
+    description: 'Volunteer for all support activities',
+    data: {
+      name: 'Arjun Menon',
+      email: 'arjun.menon@consulting.com',
+      organization: 'Global Consulting Partners',
+      supportTypes: ['mentor_post_placement', 'support_followups'],
+    },
+  },
+];
+
 export default function VolunteerSignupPage() {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,6 +71,14 @@ export default function VolunteerSignupPage() {
 
   function updateField<K extends keyof FormData>(field: K, value: FormData[K]) {
     setFormData(prev => ({ ...prev, [field]: value }));
+  }
+
+  // Fill form with demo data
+  function fillDemoData(profileId: string) {
+    const profile = DEMO_PROFILES.find(p => p.id === profileId);
+    if (profile) {
+      setFormData(profile.data);
+    }
   }
 
   function toggleSupportType(typeId: string) {
@@ -61,7 +93,6 @@ export default function VolunteerSignupPage() {
   function canSubmit(): boolean {
     return !!(
       formData.name &&
-      formData.phone &&
       formData.email &&
       formData.organization &&
       formData.supportTypes.length > 0
@@ -169,6 +200,28 @@ export default function VolunteerSignupPage() {
           <p className="text-muted-foreground">Join us in transforming lives through mentorship</p>
         </div>
 
+        {/* Demo Mode Selector - Remove this section for production */}
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <FlaskConical className="h-5 w-5 text-amber-600" />
+            <span className="font-medium text-amber-800">Demo Mode</span>
+            <span className="text-xs bg-amber-200 text-amber-800 px-2 py-0.5 rounded-full">For testing only</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {DEMO_PROFILES.map((profile) => (
+              <button
+                key={profile.id}
+                type="button"
+                onClick={() => fillDemoData(profile.id)}
+                className="px-3 py-2 text-sm bg-white border border-amber-300 rounded-lg hover:bg-amber-100 transition-colors text-left"
+              >
+                <div className="font-medium text-gray-900">{profile.label}</div>
+                <div className="text-xs text-muted-foreground">{profile.description}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Form Card */}
         <Card>
           <CardHeader>
@@ -188,26 +241,15 @@ export default function VolunteerSignupPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">Phone Number *</label>
-                    <Input
-                      placeholder="+91-XXXXXXXXXX"
-                      value={formData.phone}
-                      onChange={(e) => updateField('phone', e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">Email *</label>
-                    <Input
-                      type="email"
-                      placeholder="your@email.com"
-                      value={formData.email}
-                      onChange={(e) => updateField('email', e.target.value)}
-                      required
-                    />
-                  </div>
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Email *</label>
+                  <Input
+                    type="email"
+                    placeholder="your@email.com"
+                    value={formData.email}
+                    onChange={(e) => updateField('email', e.target.value)}
+                    required
+                  />
                 </div>
 
                 <div>

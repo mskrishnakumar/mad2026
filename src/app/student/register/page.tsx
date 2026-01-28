@@ -9,7 +9,7 @@ import { AadharUpload } from '@/components/student/AadharUpload';
 import { CentreMap } from '@/components/map/CentreMap';
 import {
   ArrowLeft, ArrowRight, Check, User, IndianRupee, FileText, MapPin,
-  CheckCircle, AlertTriangle, Loader2, Home, Mic, MicOff
+  CheckCircle, AlertTriangle, Loader2, Home, Mic, MicOff, FlaskConical
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -97,6 +97,82 @@ const COMMUNICATION_MODES = [
   { value: 'email', label: 'Email' },
 ];
 
+// Demo profiles for quick form filling
+const DEMO_PROFILES = [
+  {
+    id: 'eligible_10th',
+    label: 'Eligible Student - 10th Pass',
+    description: 'Meets all eligibility criteria, basic education',
+    data: {
+      name: 'Priya Sharma',
+      dateOfBirth: '2004-05-15',
+      gender: 'Female',
+      phone: '+91-9876543210',
+      email: 'priya.sharma@email.com',
+      address: '45, Gandhi Nagar, Tambaram',
+      pinCode: '600045',
+      educationLevel: '10th Pass',
+      hasInternet: 'yes',
+      hasMobile: 'yes',
+      mobileType: 'smartphone',
+      preferredCommunication: 'whatsapp',
+      referralSource: 'Community Centre',
+      firstGenerationGraduate: 'yes',
+      careerAspirations: 'I want to become a software developer and help my family. I am passionate about technology and want to learn coding skills to get a good job in the IT industry.',
+      annualFamilyIncome: 'below_1l',
+      currentlyEmployedOrTraining: 'no',
+    },
+  },
+  {
+    id: 'eligible_graduate',
+    label: 'Eligible Student - Graduate',
+    description: 'Graduate seeking upskilling, different income bracket',
+    data: {
+      name: 'Rajesh Kumar',
+      dateOfBirth: '2002-08-22',
+      gender: 'Male',
+      phone: '+91-9123456789',
+      email: 'rajesh.kumar@email.com',
+      address: '12, Anna Nagar East, Chennai',
+      pinCode: '600102',
+      educationLevel: 'Graduate',
+      hasInternet: 'yes',
+      hasMobile: 'yes',
+      mobileType: 'smartphone',
+      preferredCommunication: 'whatsapp',
+      referralSource: 'Social Media',
+      firstGenerationGraduate: 'no',
+      careerAspirations: 'I have completed my B.Com degree and want to transition into the digital marketing field. I believe this programme will help me gain practical skills.',
+      annualFamilyIncome: '2l_3l',
+      currentlyEmployedOrTraining: 'no',
+    },
+  },
+  {
+    id: 'needs_review',
+    label: 'Student - Needs Review',
+    description: 'Above income threshold, shows warning flow',
+    data: {
+      name: 'Ananya Reddy',
+      dateOfBirth: '2003-11-10',
+      gender: 'Female',
+      phone: '+91-9988776655',
+      email: 'ananya.reddy@email.com',
+      address: '78, T Nagar, Chennai',
+      pinCode: '600017',
+      educationLevel: '12th Pass',
+      hasInternet: 'yes',
+      hasMobile: 'yes',
+      mobileType: 'smartphone',
+      preferredCommunication: 'email',
+      referralSource: 'Referred by Friend',
+      firstGenerationGraduate: 'yes',
+      careerAspirations: 'I want to learn data analytics and work in a multinational company. I am good with numbers and want to build a career in business analytics.',
+      annualFamilyIncome: 'above_3_5l',
+      currentlyEmployedOrTraining: 'no',
+    },
+  },
+];
+
 type DocumentStatus = 'idle' | 'uploading' | 'validating' | 'success' | 'error';
 
 interface DocumentValidation {
@@ -132,6 +208,38 @@ export default function StudentRegistrationPage() {
 
   function updateField<K extends keyof FormData>(field: K, value: FormData[K]) {
     setFormData(prev => ({ ...prev, [field]: value }));
+  }
+
+  // Fill form with demo data
+  function fillDemoData(profileId: string) {
+    const profile = DEMO_PROFILES.find(p => p.id === profileId);
+    if (profile) {
+      // Generate a demo Aadhaar number based on profile
+      const demoAadhaarNumbers: Record<string, string> = {
+        'eligible_10th': '234567890123',
+        'eligible_graduate': '345678901234',
+        'needs_review': '456789012345',
+      };
+
+      setFormData(prev => ({
+        ...prev,
+        ...profile.data,
+        // Set demo Aadhaar number (skip manual upload in demo mode)
+        aadhaarNumber: demoAadhaarNumbers[profileId] || '123456789012',
+        // Keep other document fields as they are (manual upload)
+        aadhaarFile: prev.aadhaarFile,
+        bplFile: prev.bplFile,
+        rationFile: prev.rationFile,
+        selectedCentreId: prev.selectedCentreId,
+        selectedCentreName: prev.selectedCentreName,
+      }));
+
+      // Mark Aadhaar as validated in demo mode
+      setDocValidation(prev => ({
+        ...prev,
+        aadhaar: { status: 'success' }
+      }));
+    }
   }
 
   // Calculate age from date of birth
@@ -285,7 +393,8 @@ export default function StudentRegistrationPage() {
           formData.careerAspirations
         );
       case 2:
-        return !!(formData.annualFamilyIncome && formData.currentlyEmployedOrTraining && isEligible);
+        // Allow proceeding even if eligibility criteria aren't met (warnings shown instead of blocking)
+        return !!(formData.annualFamilyIncome && formData.currentlyEmployedOrTraining);
       case 3:
         return !!(formData.aadhaarNumber && docValidation.aadhaar.status === 'success');
       case 4:
@@ -416,6 +525,30 @@ export default function StudentRegistrationPage() {
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Student Registration</h1>
           <p className="text-muted-foreground">Sign up for Magic Bus Upskilling Programme</p>
+        </div>
+
+        {/* Demo Mode Selector - Remove this section for production */}
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <FlaskConical className="h-5 w-5 text-amber-600" />
+              <span className="font-medium text-amber-800">Demo Mode</span>
+              <span className="text-xs bg-amber-200 text-amber-800 px-2 py-0.5 rounded-full">For testing only</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {DEMO_PROFILES.map((profile) => (
+                <button
+                  key={profile.id}
+                  type="button"
+                  onClick={() => fillDemoData(profile.id)}
+                  className="px-3 py-2 text-sm bg-white border border-amber-300 rounded-lg hover:bg-amber-100 transition-colors text-left"
+                >
+                  <div className="font-medium text-gray-900">{profile.label}</div>
+                  <div className="text-xs text-muted-foreground">{profile.description}</div>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Progress Steps */}
@@ -719,16 +852,17 @@ export default function StudentRegistrationPage() {
             {/* Step 2: Eligibility */}
             {currentStep === 2 && (
               <div className="space-y-6">
-                {/* Age Eligibility Check */}
+                {/* Age Eligibility Warning */}
                 {formData.dateOfBirth && !isAgeEligible && (
-                  <div className="p-4 rounded-xl bg-red-50 border border-red-200">
+                  <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
                     <div className="flex items-center gap-2">
-                      <AlertTriangle className="h-5 w-5 text-red-600" />
-                      <span className="font-medium text-red-700">Age Requirement Not Met</span>
+                      <AlertTriangle className="h-5 w-5 text-amber-600" />
+                      <span className="font-medium text-amber-700">Age Requirement Notice</span>
                     </div>
-                    <p className="text-sm text-red-600 mt-2">
-                      We're sorry, the Upskilling Programme is available for candidates between 18 and 25 years of age.
-                      Your current age is {candidateAge} years. Please contact your nearest Magic Bus centre for other opportunities.
+                    <p className="text-sm text-amber-600 mt-2">
+                      The Upskilling Programme is typically for candidates between 18 and 25 years of age.
+                      Your current age is {candidateAge} years. This doesn't meet standard Magic Bus requirements.
+                      Please contact Magic Bus to confirm your eligibility before proceeding.
                     </p>
                   </div>
                 )}
@@ -750,14 +884,14 @@ export default function StudentRegistrationPage() {
                 </div>
 
                 {formData.annualFamilyIncome && !isIncomeEligible && (
-                  <div className="p-4 rounded-xl bg-red-50 border border-red-200">
+                  <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
                     <div className="flex items-center gap-2">
-                      <AlertTriangle className="h-5 w-5 text-red-600" />
-                      <span className="font-medium text-red-700">Income Requirement Not Met</span>
+                      <AlertTriangle className="h-5 w-5 text-amber-600" />
+                      <span className="font-medium text-amber-700">Income Requirement Notice</span>
                     </div>
-                    <p className="text-sm text-red-600 mt-2">
-                      We're sorry, the Upskilling Programme is currently available for families with annual income below ₹3.5 Lakhs.
-                      Please contact your nearest Magic Bus centre for other opportunities.
+                    <p className="text-sm text-amber-600 mt-2">
+                      The Upskilling Programme is typically for families with annual income below ₹3.5 Lakhs.
+                      This doesn't meet standard Magic Bus requirements. Please contact Magic Bus to confirm your eligibility before proceeding.
                     </p>
                   </div>
                 )}
@@ -777,26 +911,38 @@ export default function StudentRegistrationPage() {
                 </div>
 
                 {formData.currentlyEmployedOrTraining === 'yes' && (
-                  <div className="p-4 rounded-xl bg-red-50 border border-red-200">
+                  <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
                     <div className="flex items-center gap-2">
-                      <AlertTriangle className="h-5 w-5 text-red-600" />
-                      <span className="font-medium text-red-700">Not Eligible</span>
+                      <AlertTriangle className="h-5 w-5 text-amber-600" />
+                      <span className="font-medium text-amber-700">Employment Status Notice</span>
                     </div>
-                    <p className="text-sm text-red-600 mt-2">
-                      We're sorry, the Upskilling Programme is available only for candidates who are not currently employed or enrolled in other training programmes.
-                      Please contact your nearest Magic Bus centre for other opportunities.
+                    <p className="text-sm text-amber-600 mt-2">
+                      The Upskilling Programme is typically for candidates not currently employed or enrolled in other training programmes.
+                      This doesn't meet standard Magic Bus requirements. Please contact Magic Bus to confirm your eligibility before proceeding.
                     </p>
                   </div>
                 )}
 
                 {/* Overall Eligibility Status */}
-                {formData.annualFamilyIncome && formData.currentlyEmployedOrTraining && isAgeEligible && isEligible && (
-                  <div className="p-4 rounded-xl bg-green-50 border border-green-200">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="h-5 w-5 text-green-600" />
-                      <span className="font-medium text-green-700">You are eligible for the Upskilling Programme!</span>
+                {formData.annualFamilyIncome && formData.currentlyEmployedOrTraining && (
+                  isEligible && isAgeEligible ? (
+                    <div className="p-4 rounded-xl bg-green-50 border border-green-200">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                        <span className="font-medium text-green-700">You are eligible for the Upskilling Programme!</span>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-5 w-5 text-amber-600" />
+                        <span className="font-medium text-amber-700">You may proceed, but please contact Magic Bus</span>
+                      </div>
+                      <p className="text-sm text-amber-600 mt-2">
+                        Some eligibility criteria are not met. You can continue with registration, but please contact Magic Bus to confirm your eligibility.
+                      </p>
+                    </div>
+                  )
                 )}
               </div>
             )}

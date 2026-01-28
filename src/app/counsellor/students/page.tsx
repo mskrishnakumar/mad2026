@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, Filter, Download, Loader2 } from 'lucide-react';
-import type { StudentParsed } from '@/lib/types/data';
+import type { StudentExtended } from '@/lib/types/data';
 
 const statusColors: Record<string, string> = {
   Active: 'bg-blue-100 text-blue-700',
@@ -17,7 +17,7 @@ const statusColors: Record<string, string> = {
 
 export default function StudentsPage() {
   const router = useRouter();
-  const [students, setStudents] = useState<StudentParsed[]>([]);
+  const [students, setStudents] = useState<StudentExtended[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -30,9 +30,10 @@ export default function StudentsPage() {
     setLoading(true);
     setError(null);
     try {
+      // Use extended=true to get consistent student IDs with detail page
       const url = search
-        ? `/api/students?search=${encodeURIComponent(search)}`
-        : '/api/students';
+        ? `/api/students?extended=true&search=${encodeURIComponent(search)}`
+        : '/api/students?extended=true';
       const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch students');
       const data = await response.json();
@@ -126,16 +127,23 @@ export default function StudentsPage() {
                       </td>
                       <td className="p-4">
                         <div className="flex gap-1 flex-wrap">
-                          {student.skills.slice(0, 2).map((skill) => (
-                            <span key={skill} className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-600">
-                              {skill}
-                            </span>
-                          ))}
-                          {student.skills.length > 2 && (
-                            <span className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-600">
-                              +{student.skills.length - 2}
-                            </span>
-                          )}
+                          {(() => {
+                            const skillsArray = student.skills.split(',').map(s => s.trim()).filter(Boolean);
+                            return (
+                              <>
+                                {skillsArray.slice(0, 2).map((skill) => (
+                                  <span key={skill} className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-600">
+                                    {skill}
+                                  </span>
+                                ))}
+                                {skillsArray.length > 2 && (
+                                  <span className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-600">
+                                    +{skillsArray.length - 2}
+                                  </span>
+                                )}
+                              </>
+                            );
+                          })()}
                         </div>
                       </td>
                       <td className="p-4">

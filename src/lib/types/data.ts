@@ -207,9 +207,10 @@ export interface StudentExtended extends Student {
   centreName: string;
   engagementData?: EngagementRecord[];  // engagement channel tracking
   preferredChannel?: EngagementChannel; // student's preferred contact method
+  referralSource?: ReferralSource;      // how they heard about the program
 }
 
-// Engagement Channel types
+// Engagement Channel types (for communication tracking)
 export type EngagementChannel = 'whatsapp' | 'sms' | 'email' | 'phone' | 'in_person';
 
 // Engagement tracking per student
@@ -230,6 +231,28 @@ export interface EngagementChannelStats {
   averageResponseTime: number;   // avg days to respond
 }
 
+// Referral Source types (how students heard about the program)
+export type ReferralSource =
+  | 'alumni'           // Referred by program alumni (best outcomes)
+  | 'community'        // Community outreach programs
+  | 'school'           // School/college partnerships
+  | 'social_media'     // Facebook, Instagram, WhatsApp groups
+  | 'ngo_partner'      // Partner NGO referrals
+  | 'government'       // Government scheme referrals
+  | 'word_of_mouth'    // Friends/family recommendation
+  | 'self_discovery';  // Found online/walk-in
+
+// Referral source statistics for dashboard
+export interface ReferralSourceStats {
+  source: ReferralSource;
+  totalStudents: number;           // students from this source
+  placedCount: number;             // students who got placed
+  placementRate: number;           // percentage placed
+  avgRiskScore: number;            // average risk score
+  retentionRate: number;           // percentage still active (not dropped)
+  qualityScore: number;            // computed quality score (0-100)
+}
+
 // Extended Dashboard Statistics
 export interface DashboardStatsExtended {
   total: number;
@@ -244,4 +267,5 @@ export interface DashboardStatsExtended {
   activeAlerts: number;
   placementRate: number;      // percentage of students placed
   byEngagementChannel?: EngagementChannelStats[];  // engagement channel breakdown
+  byReferralSource?: ReferralSourceStats[];        // referral source outcomes
 }
