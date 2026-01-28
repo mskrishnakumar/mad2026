@@ -42,6 +42,13 @@ export async function POST(request: Request) {
       address: body.address || '',
       pinCode: body.pinCode,
       educationLevel: body.educationLevel,
+      // Connectivity information
+      hasInternet: body.hasInternet || false,
+      hasMobile: body.hasMobile || false,
+      mobileType: body.mobileType || '',
+      preferredCommunication: body.preferredCommunication || '',
+      // Referral source
+      referralSource: body.referralSource || '',
       annualFamilyIncome: body.annualFamilyIncome,
       isEligible: true, // Already validated on frontend
       aadhaarUploaded: body.aadhaarUploaded || false,

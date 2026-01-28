@@ -26,6 +26,13 @@ interface FormData {
   address: string;
   pinCode: string;
   educationLevel: string;
+  // Connectivity questions
+  hasInternet: string;
+  hasMobile: string;
+  mobileType: string;
+  preferredCommunication: string;
+  // Referral source
+  referralSource: string;
   // Step 2: Eligibility
   annualFamilyIncome: string;
   // Step 3: Documents
@@ -46,6 +53,11 @@ const initialFormData: FormData = {
   address: '',
   pinCode: '',
   educationLevel: '',
+  hasInternet: '',
+  hasMobile: '',
+  mobileType: '',
+  preferredCommunication: '',
+  referralSource: '',
   annualFamilyIncome: '',
   aadhaarFile: null,
   bplFile: null,
@@ -53,6 +65,26 @@ const initialFormData: FormData = {
   selectedCentreId: '',
   selectedCentreName: '',
 };
+
+const REFERRAL_SOURCES = [
+  'Community Centre',
+  'Referred by Friend',
+  'Referred by Alumni',
+  'Saw Newspaper Ad',
+  'Social Media',
+  'Other',
+];
+
+const MOBILE_TYPES = [
+  { value: 'smartphone', label: 'Smart Phone' },
+  { value: 'basic', label: 'Basic Phone' },
+];
+
+const COMMUNICATION_MODES = [
+  { value: 'whatsapp', label: 'WhatsApp' },
+  { value: 'sms', label: 'SMS' },
+  { value: 'email', label: 'Email' },
+];
 
 type DocumentStatus = 'idle' | 'uploading' | 'validating' | 'success' | 'error';
 
@@ -152,13 +184,18 @@ export default function StudentRegistrationPage() {
   function canProceed(): boolean {
     switch (currentStep) {
       case 1:
+        const mobileValid = formData.hasMobile === 'no' || (formData.hasMobile === 'yes' && formData.mobileType);
         return !!(
           formData.name &&
           formData.dateOfBirth &&
           formData.gender &&
           formData.phone &&
           formData.pinCode &&
-          formData.educationLevel
+          formData.educationLevel &&
+          formData.hasInternet &&
+          formData.hasMobile &&
+          mobileValid &&
+          formData.referralSource
         );
       case 2:
         return !!(formData.annualFamilyIncome && isEligible);
@@ -185,6 +222,11 @@ export default function StudentRegistrationPage() {
         address: formData.address,
         pinCode: formData.pinCode,
         educationLevel: formData.educationLevel,
+        hasInternet: formData.hasInternet === 'yes',
+        hasMobile: formData.hasMobile === 'yes',
+        mobileType: formData.mobileType,
+        preferredCommunication: formData.preferredCommunication,
+        referralSource: formData.referralSource,
         annualFamilyIncome: formData.annualFamilyIncome,
         selectedCentreId: formData.selectedCentreId,
         selectedCentreName: formData.selectedCentreName,
@@ -407,6 +449,129 @@ export default function StudentRegistrationPage() {
                     </select>
                   </div>
                 </div>
+
+                {/* Connectivity Section */}
+                <div className="border-t pt-4 mt-4">
+                  <h3 className="text-sm font-semibold text-gray-700 mb-3">Connectivity Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">Do you have Internet access? *</label>
+                      <select
+                        className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                        value={formData.hasInternet}
+                        onChange={(e) => {
+                          updateField('hasInternet', e.target.value);
+                          // Auto-set preferred communication
+                          if (e.target.value === 'no' && formData.hasMobile === 'no') {
+                            updateField('preferredCommunication', '');
+                          } else if (e.target.value === 'yes' && formData.hasMobile !== 'yes') {
+                            updateField('preferredCommunication', 'email');
+                          }
+                        }}
+                      >
+                        <option value="">Select</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">Do you have a Mobile? *</label>
+                      <select
+                        className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                        value={formData.hasMobile}
+                        onChange={(e) => {
+                          updateField('hasMobile', e.target.value);
+                          if (e.target.value === 'no') {
+                            updateField('mobileType', '');
+                            // If no mobile and has internet, set email
+                            if (formData.hasInternet === 'yes') {
+                              updateField('preferredCommunication', 'email');
+                            } else {
+                              updateField('preferredCommunication', '');
+                            }
+                          }
+                        }}
+                      >
+                        <option value="">Select</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {formData.hasMobile === 'yes' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                      <div>
+                        <label className="text-sm font-medium mb-1 block">Type of Mobile *</label>
+                        <select
+                          className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                          value={formData.mobileType}
+                          onChange={(e) => {
+                            updateField('mobileType', e.target.value);
+                            // Auto-set preferred communication based on mobile type
+                            if (e.target.value === 'smartphone') {
+                              updateField('preferredCommunication', 'whatsapp');
+                            } else if (e.target.value === 'basic') {
+                              updateField('preferredCommunication', 'sms');
+                            }
+                          }}
+                        >
+                          <option value="">Select type</option>
+                          {MOBILE_TYPES.map((type) => (
+                            <option key={type.value} value={type.value}>{type.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium mb-1 block">Preferred Mode of Communication</label>
+                        <select
+                          className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                          value={formData.preferredCommunication}
+                          onChange={(e) => updateField('preferredCommunication', e.target.value)}
+                        >
+                          <option value="">Select mode</option>
+                          {COMMUNICATION_MODES.filter(mode => {
+                            // Filter options based on connectivity
+                            if (mode.value === 'whatsapp' && formData.mobileType !== 'smartphone') return false;
+                            if (mode.value === 'email' && formData.hasInternet !== 'yes') return false;
+                            return true;
+                          }).map((mode) => (
+                            <option key={mode.value} value={mode.value}>{mode.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  )}
+
+                  {formData.hasMobile === 'no' && formData.hasInternet === 'yes' && (
+                    <div className="mt-4">
+                      <label className="text-sm font-medium mb-1 block">Preferred Mode of Communication</label>
+                      <select
+                        className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                        value={formData.preferredCommunication}
+                        onChange={(e) => updateField('preferredCommunication', e.target.value)}
+                      >
+                        <option value="">Select mode</option>
+                        <option value="email">Email</option>
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                {/* Referral Source */}
+                <div className="border-t pt-4 mt-4">
+                  <label className="text-sm font-medium mb-1 block">How did you hear about Magic Upskilling Programme? *</label>
+                  <select
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                    value={formData.referralSource}
+                    onChange={(e) => updateField('referralSource', e.target.value)}
+                  >
+                    <option value="">Select source</option>
+                    {REFERRAL_SOURCES.map((source) => (
+                      <option key={source} value={source}>{source}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             )}
 
@@ -511,6 +676,7 @@ export default function StudentRegistrationPage() {
                   selectedCentreId={formData.selectedCentreId}
                   nearestCentreId={nearestCentre?.id || null}
                   onSelectCentre={handleCentreSelect}
+                  userPinCode={formData.pinCode}
                 />
               </div>
             )}

@@ -13,6 +13,11 @@ import {
   X,
   Heart,
   UserCheck,
+  Bell,
+  ClipboardList,
+  FileText,
+  Settings,
+  HelpCircle,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -37,6 +42,15 @@ const volunteerMenuItems: SidebarItem[] = [
   { label: 'My Students', href: '/volunteer/students', icon: Users },
 ];
 
+const studentMenuItems: SidebarItem[] = [
+  { label: 'Dashboard', href: '/student/dashboard', icon: LayoutDashboard },
+  { label: 'Registration', href: '/student/register', icon: ClipboardList },
+  { label: 'My Profile', href: '/student/profile', icon: FileText },
+  { label: 'Notifications', href: '/student/notifications', icon: Bell },
+  { label: 'My Programmes', href: '/student/programmes', icon: GraduationCap },
+  { label: 'Help & Support', href: '/student/help', icon: HelpCircle },
+];
+
 interface SidebarProps {
   userType?: 'counsellor' | 'student' | 'volunteer';
 }
@@ -49,6 +63,8 @@ export function Sidebar({ userType = 'counsellor' }: SidebarProps) {
     ? counsellorMenuItems
     : userType === 'volunteer'
     ? volunteerMenuItems
+    : userType === 'student'
+    ? studentMenuItems
     : [];
 
   return (

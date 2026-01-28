@@ -15,7 +15,10 @@
       "Bash(git push:*)",
       "Bash(git pull:*)",
       "Bash(timeout /t 10 /nobreak)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(git commit:*)",
+      "Bash(dir:*)",
+      "Bash(git stash push:*)"
     ]
   }
 }

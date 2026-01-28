@@ -75,6 +75,13 @@ export interface StudentRegistration {
   address: string;
   pinCode: string;
   educationLevel: string;
+  // Connectivity information
+  hasInternet: boolean;
+  hasMobile: boolean;
+  mobileType: 'smartphone' | 'basic' | '';
+  preferredCommunication: 'whatsapp' | 'sms' | 'email' | '';
+  // Referral source
+  referralSource: string;
   annualFamilyIncome: string;
   isEligible: boolean;
   aadhaarUploaded: boolean;
