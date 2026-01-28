@@ -1,10 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import { LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Sidebar } from '@/components/layout/Sidebar';
+import { cn } from '@/lib/utils';
 
 // Mock student user data
 const mockStudent = {
@@ -19,12 +21,13 @@ export default function StudentLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-  // Registration page should not show sidebar (for new users)
-  const isRegistrationPage = pathname === '/student/register';
+  // Registration and login pages should not show sidebar (for new users)
+  const isPublicPage = pathname === '/student/register' || pathname === '/student/login';
 
-  // Layout without sidebar for registration
-  if (isRegistrationPage) {
+  // Layout without sidebar for registration/login
+  if (isPublicPage) {
     return <>{children}</>;
   }
 
@@ -32,10 +35,17 @@ export default function StudentLayout({
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Sidebar */}
-      <Sidebar userType="student" />
+      <Sidebar
+        userType="student"
+        isCollapsed={isSidebarCollapsed}
+        onCollapsedChange={setIsSidebarCollapsed}
+      />
 
       {/* Main Content Area */}
-      <div className="md:ml-64">
+      <div className={cn(
+        "transition-all duration-300",
+        isSidebarCollapsed ? "md:ml-20" : "md:ml-64"
+      )}>
         {/* Header for Student Portal */}
         <header className="bg-white border-b sticky top-0 z-30">
           <div className="px-4 md:px-8 h-16 flex items-center justify-between">
@@ -59,7 +69,7 @@ export default function StudentLayout({
                 className="text-red-600 hover:text-red-700 hover:bg-red-50"
                 asChild
               >
-                <Link href="/">
+                <Link href="/student/login">
                   <LogOut className="h-4 w-4 mr-1" />
                   <span className="hidden sm:inline">Log Out</span>
                 </Link>
