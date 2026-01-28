@@ -4,7 +4,8 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
-RUN npm ci --only=production
+# Install all dependencies (including dev) for the build stage
+RUN npm ci
 
 # Stage 2: Builder
 FROM node:20-alpine AS builder
