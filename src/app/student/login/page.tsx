@@ -401,9 +401,13 @@ export default function StudentLoginPage() {
                 </div>
 
                 <Button type="submit" className="w-full h-11" disabled={isLoading}>
-                  {isLoading ? 'Creating account...' : 'Create Account'}
+                  {isLoading ? 'Creating account...' : 'Create Account & Continue to Registration'}
                   {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
                 </Button>
+
+                <p className="text-xs text-center text-muted-foreground">
+                  After signup, you'll complete a short registration form to join the Upskilling Programme.
+                </p>
 
                 <p className="text-xs text-center text-muted-foreground">
                   By signing up, you agree to our{' '}
@@ -420,7 +424,13 @@ export default function StudentLoginPage() {
           </div>
 
           {/* Additional Links */}
-          <div className="mt-6 text-center">
+          <div className="mt-6 text-center space-y-2">
+            <p className="text-sm text-muted-foreground">
+              New user?{' '}
+              <Link href="/student/register" className="text-primary hover:underline font-medium">
+                Complete Registration Form
+              </Link>
+            </p>
             <p className="text-sm text-muted-foreground">
               Need help?{' '}
               <Link href="/student/help" className="text-primary hover:underline">

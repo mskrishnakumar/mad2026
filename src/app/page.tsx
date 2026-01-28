@@ -119,7 +119,7 @@ export default function Home() {
                 className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
               >
                 <LogIn className="w-4 h-4" />
-                <span>Staff Login</span>
+                <span>Admin Login</span>
                 <ChevronDown className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
@@ -169,7 +169,7 @@ export default function Home() {
             title={translations.studentTitle}
             description={translations.studentDesc}
             icon={GraduationCap}
-            href="/student/register"
+            href="/student/login"
             colorScheme="blue"
           />
           <RoleCard
