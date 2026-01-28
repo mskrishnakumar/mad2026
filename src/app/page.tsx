@@ -332,8 +332,8 @@ export default function Home() {
                 <Mail className="w-6 h-6 text-teal-600" />
               </div>
               <p className="text-sm font-medium text-gray-900">Email Us</p>
-              <a href="mailto:connect@magicbus.org" className="text-teal-600 hover:underline font-medium">
-                connect@magicbus.org
+              <a href="mailto:info@magicbusindia.org" className="text-teal-600 hover:underline font-medium">
+                info@magicbusindia.org
               </a>
               <p className="text-xs text-muted-foreground mt-1">We respond within 24 hours</p>
             </div>
@@ -361,11 +361,11 @@ export default function Home() {
       <div className="w-full bg-gradient-to-r from-slate-100 to-gray-100 text-gray-600 py-3 border-t border-gray-200">
         <div className="max-w-6xl mx-auto px-4 text-center">
           <div className="flex items-center justify-center gap-2">
-            <Construction className="w-4 h-4 text-gray-500" />
-            <p className="text-sm font-medium">
+            <Construction className="w-5 h-5 text-gray-500" />
+            <p className="text-base font-medium">
               Beta Version - Under Active Construction
             </p>
-            <Construction className="w-4 h-4 text-gray-500" />
+            <Construction className="w-5 h-5 text-gray-500" />
           </div>
           <p className="text-xs text-gray-500 mt-1">
             We're continuously improving. Your feedback helps us serve students better!

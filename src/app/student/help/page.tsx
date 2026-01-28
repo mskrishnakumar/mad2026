@@ -58,7 +58,7 @@ export default function HelpPage() {
               <Mail className="h-5 w-5 text-primary" />
               <div>
                 <p className="text-sm text-muted-foreground">Email Support</p>
-                <p className="font-medium">support@magicbus.org</p>
+                <p className="font-medium">info@magicbusindia.org</p>
                 <p className="text-xs text-muted-foreground">Response within 24 hours</p>
               </div>
             </div>
