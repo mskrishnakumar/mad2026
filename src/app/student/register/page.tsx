@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FileUpload } from '@/components/ui/FileUpload';
+import { AadharUpload } from '@/components/student/AadharUpload';
 import { CentreMap } from '@/components/map/CentreMap';
 import {
   ArrowLeft, ArrowRight, Check, User, IndianRupee, FileText, MapPin,
@@ -30,6 +31,7 @@ interface FormData {
   annualFamilyIncome: string;
   // Step 3: Documents
   aadhaarFile: File | null;
+  aadhaarNumber: string;
   bplFile: File | null;
   rationFile: File | null;
   // Step 4: Centre
@@ -48,6 +50,7 @@ const initialFormData: FormData = {
   educationLevel: '',
   annualFamilyIncome: '',
   aadhaarFile: null,
+  aadhaarNumber: '',
   bplFile: null,
   rationFile: null,
   selectedCentreId: '',
@@ -141,6 +144,14 @@ export default function StudentRegistrationPage() {
         [type]: { status: 'idle' }
       }));
     }
+  }
+
+  function handleAadharValidationSuccess(aadharNumber: string) {
+    updateField('aadhaarNumber', aadharNumber);
+    setDocValidation(prev => ({
+      ...prev,
+      aadhaar: { status: 'success' }
+    }));
   }
 
   function handleCentreSelect(centre: MagicBusCentre) {
@@ -462,13 +473,8 @@ export default function StudentRegistrationPage() {
                   Please upload clear photos or scans of your identity documents. Aadhaar card is required.
                 </p>
 
-                <FileUpload
-                  label="Aadhaar Card"
-                  required
-                  accept="image/*"
-                  onFileSelect={(file) => handleFileSelect('aadhaar', file)}
-                  status={docValidation.aadhaar.status}
-                  error={docValidation.aadhaar.error}
+                <AadharUpload
+                  onValidationSuccess={handleAadharValidationSuccess}
                 />
 
                 <FileUpload
@@ -486,15 +492,6 @@ export default function StudentRegistrationPage() {
                   status={docValidation.ration.status}
                   error={docValidation.ration.error}
                 />
-
-                {docValidation.aadhaar.status === 'error' && (
-                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                    <p className="text-sm text-amber-700">
-                      <strong>Tip:</strong> Make sure the name on your Aadhaar card matches the name you entered in Step 1.
-                      You can go back and correct it, or re-upload a clearer image.
-                    </p>
-                  </div>
-                )}
               </div>
             )}
 
