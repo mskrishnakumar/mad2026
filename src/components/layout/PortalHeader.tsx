@@ -18,15 +18,25 @@ const mockUsers = {
     lastSignedIn: '28 Jan 2026, 8:15 AM',
     role: 'Student',
   },
+  volunteer: {
+    name: 'Amit Sharma',
+    email: 'amit.sharma@barclays.com',
+    lastSignedIn: '28 Jan 2026, 10:00 AM',
+    role: 'Volunteer Mentor',
+  },
 };
 
 interface PortalHeaderProps {
-  userType: 'counsellor' | 'student';
+  userType: 'counsellor' | 'student' | 'volunteer';
 }
 
 export function PortalHeader({ userType }: PortalHeaderProps) {
   const user = mockUsers[userType];
-  const avatarColor = userType === 'counsellor' ? 'bg-teal-500' : 'bg-blue-500';
+  const avatarColor = userType === 'counsellor'
+    ? 'bg-teal-500'
+    : userType === 'volunteer'
+    ? 'bg-purple-500'
+    : 'bg-blue-500';
 
   return (
     <header className="h-16 bg-white border-b sticky top-0 z-30 md:ml-64">

@@ -2,7 +2,7 @@
 
 import { Container } from '@/components/layout/Container';
 import { RoleCard } from '@/components/landing/RoleCard';
-import { ClipboardList, GraduationCap } from 'lucide-react';
+import { ClipboardList, GraduationCap, Heart } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -26,20 +26,27 @@ export default function Home() {
         </div>
 
         {/* Role Selection Cards */}
-        <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto mb-12">
+        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
           <RoleCard
-            title="I'm a Counsellor"
-            description="Onboard students, assess their skills, and match them to the right programmes and job opportunities."
+            title="I'm a Student"
+            description="Sign up for Upskilling Programmes and discover job opportunities that match your career aspirations."
+            icon={GraduationCap}
+            href="/student/register"
+            colorScheme="blue"
+          />
+          <RoleCard
+            title="I'm an Admin"
+            description="Onboard students, assess their skills, match them to programmes, and manage volunteer assignments."
             icon={ClipboardList}
             href="/counsellor/dashboard"
             colorScheme="teal"
           />
           <RoleCard
-            title="I'm a Student"
-            description="Discover programmes and job opportunities that match your skills and career aspirations."
-            icon={GraduationCap}
-            href="/student/dashboard"
-            colorScheme="blue"
+            title="I'm a Volunteer"
+            description="Support students post-placement as a mentor and help them succeed in their new careers."
+            icon={Heart}
+            href="/volunteer/signup"
+            colorScheme="purple"
           />
         </div>
 

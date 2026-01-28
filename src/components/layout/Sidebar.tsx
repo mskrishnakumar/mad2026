@@ -11,6 +11,8 @@ import {
   Users,
   Menu,
   X,
+  Heart,
+  UserCheck,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -26,17 +28,28 @@ const counsellorMenuItems: SidebarItem[] = [
   { label: 'Programme Matching', href: '/counsellor/programme-matching', icon: GraduationCap },
   { label: 'Job Matching', href: '/counsellor/job-matching', icon: Briefcase },
   { label: 'Students', href: '/counsellor/students', icon: Users },
+  { label: 'Volunteers', href: '/counsellor/volunteers', icon: Heart },
+  { label: 'Mentor Assignment', href: '/counsellor/mentor-assignment', icon: UserCheck },
+];
+
+const volunteerMenuItems: SidebarItem[] = [
+  { label: 'Dashboard', href: '/volunteer/dashboard', icon: LayoutDashboard },
+  { label: 'My Students', href: '/volunteer/students', icon: Users },
 ];
 
 interface SidebarProps {
-  userType?: 'counsellor' | 'student';
+  userType?: 'counsellor' | 'student' | 'volunteer';
 }
 
 export function Sidebar({ userType = 'counsellor' }: SidebarProps) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
-  const menuItems = userType === 'counsellor' ? counsellorMenuItems : [];
+  const menuItems = userType === 'counsellor'
+    ? counsellorMenuItems
+    : userType === 'volunteer'
+    ? volunteerMenuItems
+    : [];
 
   return (
     <>

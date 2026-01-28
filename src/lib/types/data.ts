@@ -63,3 +63,74 @@ export interface JobParsed extends Omit<Job, 'required_skills' | 'salary_min' | 
   salary_max: number;
   openings: number;
 }
+
+// Student Registration (self-signup flow)
+export interface StudentRegistration {
+  id: string;
+  name: string;
+  dateOfBirth: string;
+  gender: string;
+  phone: string;
+  email: string;
+  address: string;
+  pinCode: string;
+  educationLevel: string;
+  annualFamilyIncome: string;
+  isEligible: boolean;
+  aadhaarUploaded: boolean;
+  aadhaarVerified: boolean;
+  bplCardUploaded: boolean;
+  rationCardUploaded: boolean;
+  documentValidationStatus: 'pending' | 'verified' | 'failed';
+  documentValidationError?: string;
+  selectedCentreId: string;
+  selectedCentreName: string;
+  status: 'pending_verification' | 'verified' | 'rejected';
+  registrationDate: string;
+}
+
+// Volunteer
+export interface Volunteer {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  organization: string;
+  supportTypes: string[]; // ['mentor_post_placement', 'support_followups']
+  status: 'pending' | 'approved' | 'active';
+  registrationDate: string;
+  assignedStudents?: string[];
+}
+
+// Magic Bus Centre
+export interface MagicBusCentre {
+  id: string;
+  name: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  pinCodes: string[];
+  capacity: number;
+  currentEnrollment: number;
+}
+
+// Mentor Assignment
+export interface MentorAssignment {
+  id: string;
+  volunteerId: string;
+  volunteerName?: string;
+  studentId: string;
+  studentName?: string;
+  assignedDate: string;
+  status: 'active' | 'completed';
+}
+
+// Student Progress (volunteer tracking)
+export interface StudentProgress {
+  id: string;
+  studentId: string;
+  volunteerId: string;
+  date: string;
+  activityType: 'call' | 'meeting' | 'followup' | 'note';
+  notes: string;
+}
