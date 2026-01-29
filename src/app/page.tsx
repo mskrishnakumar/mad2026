@@ -95,9 +95,16 @@ export default function Home() {
     }
   };
 
+  // Use ref to store translateText to avoid dependency issues
+  const translateTextRef = useRef(translateText);
+  useEffect(() => {
+    translateTextRef.current = translateText;
+  }, [translateText]);
+
   useEffect(() => {
     if (currentLanguage !== 'en') {
       const translateAll = async () => {
+        const translate = translateTextRef.current;
         const keys = Object.keys(translations) as Array<keyof typeof translations>;
         const originalTexts: Record<string, string> = {
           title: 'Mission Possible',
@@ -113,7 +120,7 @@ export default function Home() {
         };
         const translatedEntries = await Promise.all(
           keys.map(async (key) => {
-            const translated = await translateText(originalTexts[key], currentLanguage);
+            const translated = await translate(originalTexts[key], currentLanguage);
             return [key, translated];
           })
         );
@@ -123,7 +130,7 @@ export default function Home() {
         const translatedTestimonialsData = await Promise.all(
           testimonials.map(async (testimonial) => ({
             ...testimonial,
-            quote: await translateText(testimonial.quote, currentLanguage),
+            quote: await translate(testimonial.quote, currentLanguage),
           }))
         );
         setTranslatedTestimonials(translatedTestimonialsData);
@@ -145,7 +152,7 @@ export default function Home() {
       });
       setTranslatedTestimonials(testimonials);
     }
-  }, [currentLanguage, translateText]);
+  }, [currentLanguage]);
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-background to-muted/20">
