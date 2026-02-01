@@ -5,7 +5,8 @@ import { Container } from '@/components/layout/Container';
 import { RoleCard } from '@/components/landing/RoleCard';
 import { LanguageSelector } from '@/components/translation/LanguageSelector';
 import { useTranslation } from '@/lib/hooks/useTranslation';
-import { GraduationCap, Heart, Quote, Phone, Mail, MapPin, LogIn, ChevronLeft, ChevronRight, Construction, X, Shield } from 'lucide-react';
+import { GraduationCap, Heart, Quote, Phone, Mail, MapPin, LogIn, ChevronLeft, ChevronRight, Construction, X, Shield, Presentation } from 'lucide-react';
+import Link from 'next/link';
 import Image from 'next/image';
 
 const testimonials = [
@@ -173,6 +174,15 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-4">
+            {/* Solution Blueprint Link */}
+            <Link
+              href="/overview"
+              className="flex items-center gap-2 px-3 py-2 text-sm text-teal-600 hover:text-teal-800 hover:bg-teal-50 rounded-lg transition-colors font-medium"
+            >
+              <Presentation className="w-4 h-4" />
+              <span className="hidden sm:inline">Blueprint</span>
+            </Link>
+
             {/* Language Selector */}
             <LanguageSelector currentLanguage={currentLanguage} onLanguageChange={changeLanguage} />
 

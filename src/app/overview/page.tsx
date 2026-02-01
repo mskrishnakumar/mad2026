@@ -34,7 +34,7 @@ const sections = [
   { id: 'goals', label: '4 Goals' },
   { id: 'architecture', label: 'Architecture' },
   { id: 'portals', label: 'Portals' },
-  { id: 'roadmap', label: "What's Next" },
+  { id: 'roadmap', label: 'Looking Ahead' },
 ];
 
 const goals = [
@@ -89,8 +89,9 @@ const goals = [
       'Multi-language support (Hindi, Marathi, Tamil, Telugu + more)',
       'AI-powered chat interface for natural conversational engagement',
       'Responsive design works on any device - phone, tablet, desktop',
+      'Interactive centre map showing locations and distances — helping students choose the nearest community centre',
     ],
-    features: ['PWA Mobile App', 'Multi-Language', 'AI Chat'],
+    features: ['PWA Mobile App', 'Multi-Language', 'AI Chat', 'Centre Map'],
   },
   {
     id: 'improve',
@@ -131,8 +132,8 @@ const techStack = [
 const roadmap = [
   {
     phase: 'Phase 1',
-    title: 'Hardening & Launch Prep',
-    items: ['Extensive end-to-end and integration testing across all portals', 'Full authentication system with role-based access, email verification and password recovery', 'Fine-tuning AI smart matching with real programme and job outcome data', 'SMS/WhatsApp notification integration'],
+    title: 'Production Readiness & Pilot Launch',
+    items: ['Review solution design with Magic Bus leads and technology teams', 'Extensive end-to-end and integration testing across all portals', 'Full authentication system with role-based access, email verification and password recovery', 'Fine-tuning AI smart matching with real programme and job outcome data', 'SMS/WhatsApp notification integration'],
     status: 'next',
   },
   {
@@ -144,7 +145,7 @@ const roadmap = [
   {
     phase: 'Phase 3',
     title: 'Scale & Expand',
-    items: ['Multi-centre deployment across India', 'Employer integration — direct job posting portal and placement pipeline', 'Integration with government skill databases'],
+    items: ['Multi-centre deployment across India', 'Employer integration — direct job posting portal and placement pipeline', 'Integration with government skill databases', 'Operational transfer and handover to Magic Bus technology team'],
     status: 'future',
   },
 ];
@@ -244,6 +245,11 @@ export default function OverviewPage() {
           <p className="text-sm text-gray-500 font-medium">
             Built by Barclays volunteers for Make a Difference 2026, in partnership with Magic Bus
           </p>
+
+          <div className="mt-4 inline-flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-full px-4 py-1.5">
+            <Brain className="w-3.5 h-3.5 text-gray-400" />
+            <p className="text-xs text-gray-400">Built with AI coding agents for faster time to market</p>
+          </div>
         </div>
       </section>
 
@@ -252,7 +258,7 @@ export default function OverviewPage() {
         {/* ─── PROBLEM SECTION ─── */}
         <section id="problem" className="py-16 border-b border-gray-100">
           <div className="text-center mb-10">
-            <p className="text-sm font-semibold text-teal-600 uppercase tracking-wider mb-2">The Challenge</p>
+
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Why This Matters</h2>
             <p className="text-gray-500 max-w-2xl mx-auto">
               Magic Bus empowers young people aged 18-25 through skilling and job placement programmes, but today&apos;s process faces critical bottlenecks.
@@ -280,18 +286,13 @@ export default function OverviewPage() {
         {/* ─── OUR APPROACH SECTION ─── */}
         <section id="digital-first" className="py-16 border-b border-gray-100">
           <div className="text-center mb-10">
-            <p className="text-sm font-semibold text-teal-600 uppercase tracking-wider mb-2">Our Approach</p>
+
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Be Useful, Not Just Impressive</h2>
             <p className="text-gray-500 max-w-2xl mx-auto mb-2">
-              We chose to ship something real and useful over something that only looks good in a demo. Every feature here is functional end-to-end, powered by seeded sample data. What you see is what works — imperfections included.
+              Our mission: predict the right candidates, automate onboarding, optimise engagement channels, and improve retention and job placement outcomes — transforming a 60-day process into a seamless digital experience.
             </p>
-          </div>
-
-          {/* Mission */}
-          <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl p-6 border border-teal-100 mb-10">
-            <h3 className="font-bold text-gray-900 text-sm mb-2">Our Mission</h3>
-            <p className="text-sm text-teal-800 leading-relaxed">
-              Build an AI-powered solution that predicts the right candidates, automates onboarding, optimises engagement channels, and improves retention and job placement outcomes — transforming a 60-day process into a seamless digital experience.
+            <p className="text-gray-500 max-w-2xl mx-auto">
+              We chose to ship something real and useful over something that only looks good in a demo. Every feature here is functional end-to-end, powered by seeded sample data. What you see is what works — imperfections included.
             </p>
           </div>
 
@@ -357,7 +358,7 @@ export default function OverviewPage() {
         {/* ─── 4 GOALS SECTION ─── */}
         <section id="goals" className="py-16 border-b border-gray-100">
           <div className="text-center mb-10">
-            <p className="text-sm font-semibold text-teal-600 uppercase tracking-wider mb-2">Solution Mapping</p>
+
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Mapping Solutions to Goals</h2>
             <p className="text-gray-500 max-w-2xl mx-auto">
               Every feature we built ties directly back to one of the four hackathon goals. Here&apos;s how.
@@ -404,8 +405,11 @@ export default function OverviewPage() {
         {/* ─── ARCHITECTURE SECTION ─── */}
         <section id="architecture" className="py-16 border-b border-gray-100">
           <div className="text-center mb-10">
-            <p className="text-sm font-semibold text-teal-600 uppercase tracking-wider mb-2">Technical</p>
+
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Tech Stack & Architecture</h2>
+            <p className="text-gray-500 max-w-2xl mx-auto">
+              Modern, cloud-native, mobile-first — built to scale.
+            </p>
           </div>
 
           {/* Why these choices */}
@@ -448,7 +452,7 @@ export default function OverviewPage() {
         {/* ─── PORTALS SECTION ─── */}
         <section id="portals" className="py-16 border-b border-gray-100">
           <div className="text-center mb-10">
-            <p className="text-sm font-semibold text-teal-600 uppercase tracking-wider mb-2">User Experience</p>
+
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Three Portals, One Platform</h2>
           </div>
 
@@ -531,7 +535,7 @@ export default function OverviewPage() {
                 <p className="text-sm text-gray-700 leading-relaxed mb-3">
                   By enrolling volunteers centrally through a single platform, we unlock a dual impact for Magic Bus:
                 </p>
-                <div className="grid sm:grid-cols-2 gap-3">
+                <div className="grid sm:grid-cols-3 gap-3">
                   <div className="bg-white/70 rounded-lg p-3 border border-purple-100">
                     <p className="text-xs font-semibold text-purple-700 uppercase tracking-wide mb-1">Mobilisation</p>
                     <p className="text-sm text-gray-600">
@@ -544,6 +548,12 @@ export default function OverviewPage() {
                       Matched mentors provide ongoing guidance after job placement — reducing dropout, building confidence, and improving long-term retention outcomes.
                     </p>
                   </div>
+                  <div className="bg-white/70 rounded-lg p-3 border border-emerald-100">
+                    <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wide mb-1">Alumni as Volunteers</p>
+                    <p className="text-sm text-gray-600">
+                      Successfully placed alumni return as volunteer mentors — guiding the next generation through the same journey they completed, creating a self-sustaining cycle of impact.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -554,8 +564,8 @@ export default function OverviewPage() {
         {/* ─── ROADMAP SECTION ─── */}
         <section id="roadmap" className="py-16">
           <div className="text-center mb-10">
-            <p className="text-sm font-semibold text-teal-600 uppercase tracking-wider mb-2">Looking Ahead</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">What&apos;s Next</h2>
+
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Looking Ahead</h2>
             <p className="text-gray-500 max-w-2xl mx-auto">
               Our roadmap for taking Mission Possible from hackathon prototype to production platform.
             </p>
@@ -570,7 +580,7 @@ export default function OverviewPage() {
               <div>
                 <h4 className="font-bold text-gray-900 text-sm mb-1">Built with AI Coding Agents</h4>
                 <p className="text-sm text-gray-600 leading-relaxed">
-                  This solution was largely developed using AI coding agents to deliver faster time to market. This approach enabled rapid prototyping across three portals and 15+ API endpoints. As a critical next step, <strong className="text-gray-800">extensive end-to-end testing, integration testing, and security audits</strong> are required before production deployment to ensure reliability and data safety.
+                  This solution was largely developed using AI coding agents for faster time to market. This approach enabled rapid prototyping across three portals and 15+ API endpoints. As a critical next step, <strong className="text-gray-800">extensive end-to-end testing, integration testing, and security audits</strong> are required before production deployment to ensure reliability and data safety.
                 </p>
               </div>
             </div>

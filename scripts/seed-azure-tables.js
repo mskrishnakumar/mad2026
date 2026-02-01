@@ -93,7 +93,8 @@ async function clearTable(tableName) {
 }
 
 // Seed a table with data
-async function seedTable(tableName, data, partitionKeyField = 'id') {
+// fixedPartitionKey: if set, all entities get this partition key (e.g. 'STUDENT')
+async function seedTable(tableName, data, partitionKeyField = 'id', fixedPartitionKey = null) {
   const client = TableClient.fromConnectionString(CONNECTION_STRING, tableName);
 
   let success = 0;
@@ -102,7 +103,7 @@ async function seedTable(tableName, data, partitionKeyField = 'id') {
   for (const item of data) {
     try {
       const entity = {
-        partitionKey: String(item[partitionKeyField] || 'default'),
+        partitionKey: fixedPartitionKey || String(item[partitionKeyField] || 'default'),
         rowKey: String(item.id || item[partitionKeyField]),
         ...Object.fromEntries(
           Object.entries(item).map(([k, v]) => [
@@ -139,8 +140,27 @@ async function main() {
     console.log('\n📚 Processing Students...');
     await ensureTable(TABLE_NAMES.students);
     if (shouldClear) await clearTable(TABLE_NAMES.students);
-    const students = loadSeedData('students.json');
-    results.students = await seedTable(TABLE_NAMES.students, students);
+    const studentsRaw = loadSeedData('students.json');
+    // Map seed data fields to match app's StudentEntity interface (camelCase)
+    const students = studentsRaw.map(s => ({
+      name: s.name,
+      id: s.id,
+      age: parseInt(s.age) || 0,
+      gender: s.gender,
+      contactPhone: s.contact_phone || '',
+      contactEmail: s.contact_email || '',
+      educationLevel: s.education_level || '',
+      status: s.status || 'Onboarding',
+      skills: typeof s.skills === 'string' && !s.skills.startsWith('[')
+        ? JSON.stringify(s.skills.split(',').map(sk => sk.trim()))
+        : s.skills,
+      aspirations: typeof s.aspirations === 'string' && !s.aspirations.startsWith('[')
+        ? JSON.stringify(s.aspirations.split(',').map(a => a.trim()))
+        : s.aspirations,
+      enrolledDate: s.enrolled_date || '',
+      counsellorId: s.counsellor_id || '',
+    }));
+    results.students = await seedTable(TABLE_NAMES.students, students, 'id', 'STUDENT');
     console.log(`  ✓ Students: ${results.students.success} seeded, ${results.students.errors} errors`);
   }
 
@@ -149,8 +169,22 @@ async function main() {
     console.log('\n📖 Processing Programmes...');
     await ensureTable(TABLE_NAMES.programmes);
     if (shouldClear) await clearTable(TABLE_NAMES.programmes);
-    const programmes = loadSeedData('programmes.json');
-    results.programmes = await seedTable(TABLE_NAMES.programmes, programmes);
+    const programmesRaw = loadSeedData('programmes.json');
+    const programmes = programmesRaw.map(p => ({
+      id: p.id,
+      name: p.name,
+      category: p.category,
+      description: p.description,
+      requiredSkills: typeof p.required_skills === 'string' && !p.required_skills.startsWith('[')
+        ? JSON.stringify(p.required_skills.split(',').map(sk => sk.trim()))
+        : p.required_skills,
+      educationLevel: p.education_level || '',
+      durationMonths: parseInt(p.duration_months) || 0,
+      certification: p.certification || '',
+      employmentRate: parseInt(p.employment_rate) || 0,
+      avgSalary: parseInt(p.avg_salary) || 0,
+    }));
+    results.programmes = await seedTable(TABLE_NAMES.programmes, programmes, 'category');
     console.log(`  ✓ Programmes: ${results.programmes.success} seeded, ${results.programmes.errors} errors`);
   }
 
@@ -159,8 +193,25 @@ async function main() {
     console.log('\n💼 Processing Jobs...');
     await ensureTable(TABLE_NAMES.jobs);
     if (shouldClear) await clearTable(TABLE_NAMES.jobs);
-    const jobs = loadSeedData('jobs.json');
-    results.jobs = await seedTable(TABLE_NAMES.jobs, jobs);
+    const jobsRaw = loadSeedData('jobs.json');
+    const jobs = jobsRaw.map(j => ({
+      id: j.id,
+      title: j.title,
+      company: j.company,
+      location: j.location,
+      industry: j.industry,
+      jobType: j.job_type || '',
+      requiredSkills: typeof j.required_skills === 'string' && !j.required_skills.startsWith('[')
+        ? JSON.stringify(j.required_skills.split(',').map(sk => sk.trim()))
+        : j.required_skills,
+      educationLevel: j.education_level || '',
+      salaryMin: parseInt(j.salary_min) || 0,
+      salaryMax: parseInt(j.salary_max) || 0,
+      openings: parseInt(j.openings) || 0,
+      postedDate: j.posted_date || '',
+      status: j.status || 'Active',
+    }));
+    results.jobs = await seedTable(TABLE_NAMES.jobs, jobs, 'industry');
     console.log(`  ✓ Jobs: ${results.jobs.success} seeded, ${results.jobs.errors} errors`);
   }
 

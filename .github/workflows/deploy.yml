@@ -6,13 +6,22 @@ on:
       - main
       - master
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'personal'
+        type: choice
+        options:
+          - personal
+          - hackathon
 
 env:
-  ACR_NAME: mad2026acr
-  ACR_LOGIN_SERVER: mad2026acr.azurecr.io
+  ACR_NAME: ${{ vars.ACR_NAME || 'mad2026personalacr' }}
+  ACR_LOGIN_SERVER: ${{ vars.ACR_LOGIN_SERVER || 'mad2026personalacr.azurecr.io' }}
   IMAGE_NAME: mad2026
-  RESOURCE_GROUP: mad2026-india-rg
-  CONTAINER_APP_NAME: mad2026-hackathon-app
+  RESOURCE_GROUP: ${{ vars.RESOURCE_GROUP || 'mad2026-india-personal-rg' }}
+  CONTAINER_APP_NAME: ${{ vars.CONTAINER_APP_NAME || 'mad2026-personal-app' }}
 
 jobs:
   build-and-deploy:
