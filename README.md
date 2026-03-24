@@ -1,37 +1,380 @@
-# MAD2026 - Hackathon Starter
+# Mission Possible — Digital Youth Mobilisation Platform
 
-A ready-to-use Next.js template with patterns from CareerAdvisor & ScholarshipFinder.
+A digital-first, AI-powered platform for youth mobilisation, skilling, and job placements across India's underserved communities. Built by **Team Mission Possible** (Barclays volunteers) for **Make a Difference 2026**, in partnership with **Magic Bus India Foundation**.
 
-## Prerequisites
+> **Live Solution Blueprint:** Run the app and visit `/overview` for an interactive walkthrough of the solution design, goals, and roadmap.
 
-Install the required tools using Chocolatey (run PowerShell as Administrator):
+---
 
-```powershell
-# Install Chocolatey (if not already installed)
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+## Table of Contents
 
-# Install all prerequisites
-choco install git nodejs-lts azure-cli gh typescript -y
+- [Problem Statement](#problem-statement)
+- [Solution Overview](#solution-overview)
+- [Architecture](#architecture)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Three Portals](#three-portals)
+- [Key Features](#key-features)
+- [API Endpoints](#api-endpoints)
+- [Data Models](#data-models)
+- [Getting Started](#getting-started)
+- [Environment Variables](#environment-variables)
+- [Deployment](#deployment)
+- [Roadmap](#roadmap)
+- [Documentation](#documentation)
 
-# Verify installations
-node --version      # Should show v20.x or higher
-npm --version       # Should show 10.x or higher
-gh --version        # GitHub CLI
-az --version        # Azure CLI
-tsc --version       # TypeScript compiler
+---
+
+## Problem Statement
+
+Magic Bus empowers young people aged 18–25 through skilling and job placement programmes. The current process faces critical bottlenecks:
+
+| Challenge | Detail |
+|-----------|--------|
+| **60-day onboarding** | Manual paper-based registration and screening |
+| **Manual screening** | Fragmented eligibility checks and engagement |
+| **Low channel visibility** | Resources misallocated, no data on what works |
+| **High dropout risk** | During mobilisation and post-placement phases |
+
+---
+
+## Solution Overview
+
+Mission Possible transforms the manual 60-day process into a seamless digital experience, organised around **four goals**:
+
+### 1. Predict & Identify
+- AI-powered **risk scoring engine** (7 research-backed factors) flags at-risk students early
+- **Dashboard analytics** with dropout prediction indicators and pipeline stage tracking
+- **Smart programme matching** using hybrid rule-based + semantic scoring
+
+### 2. Automate Onboarding
+- **Digital registration** with guided multi-step forms
+- **Aadhar card validation** using Verhoeff algorithm + document upload
+- **AI chatbot assistant** for guided onboarding support (RAG-ready)
+- Automated programme eligibility checks and recommendations
+
+### 3. Optimise Channels
+- **Progressive Web App (PWA)** — mobile-first, installable, works offline
+- **Multi-language support** — Hindi, Marathi, Tamil, Telugu, Kannada, Bengali, Gujarati + more via Azure Translator
+- **Interactive centre map** — Leaflet-based, shows nearest Magic Bus centres
+- Responsive design for any device (phone, tablet, desktop)
+
+### 4. Improve Outcomes
+- **Hybrid scoring algorithm** for job-to-student matching
+- **Volunteer mentor assignment** with availability tracking
+- **Post-placement student progress monitoring**
+- **Resume Builder** — students create professional resumes with live preview and PDF export
+
+---
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                      Azure Container Apps                           │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │                   Next.js 16 Application                      │  │
+│  │                                                               │  │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌────────────────────┐  │  │
+│  │  │  3 Portals   │  │  17+ API     │  │   Service Layer    │  │  │
+│  │  │  Student     │  │  Routes      │  │   Risk Scoring     │  │  │
+│  │  │  Counsellor  │  │  /students   │  │   Hybrid Matching  │  │  │
+│  │  │  Volunteer   │  │  /jobs       │  │   Dashboard Stats  │  │  │
+│  │  │              │  │  /programmes │  │   Alert Engine     │  │  │
+│  │  │              │  │  /volunteers │  │   Translation      │  │  │
+│  │  │              │  │  /translate  │  │   Aadhar Validator  │  │  │
+│  │  │              │  │  /alerts     │  │                    │  │  │
+│  │  └──────────────┘  └──────────────┘  └────────────────────┘  │  │
+│  │                           │                                   │  │
+│  │  ┌───────────────────────────────────────────────────────┐   │  │
+│  │  │              Data Abstraction Layer                     │   │  │
+│  │  │     Local CSV  ←→  DATA_SOURCE env  ←→  Azure Tables   │   │  │
+│  │  └───────────────────────────────────────────────────────┘   │  │
+│  └───────────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────┘
+         │                    │                    │
+         ▼                    ▼                    ▼
+┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
+│  Azure Table    │  │  Azure Blob     │  │  Azure          │
+│  Storage        │  │  Storage        │  │  Translator     │
+│  (Students,     │  │  (Aadhar docs,  │  │  (8+ Indian     │
+│   Jobs,         │  │   Resumes,      │  │   languages)    │
+│   Programmes,   │  │   Certificates) │  │                 │
+│   Volunteers)   │  │                 │  │                 │
+└─────────────────┘  └─────────────────┘  └─────────────────┘
 ```
 
-### What Gets Installed
+### Data Flow
+
+```
+User → React UI → Next.js API Route → Service Layer → Data Layer → Azure Storage
+                                           │
+                                           ├── Risk Calculator (7-factor model)
+                                           ├── Hybrid Scorer (rule-based + semantic)
+                                           ├── Azure Translator (multi-language)
+                                           └── Aadhar Validator (Verhoeff algorithm)
+```
+
+---
+
+## Tech Stack
+
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| **Frontend** | Next.js 16, React 19, TypeScript | App Router, SSR, Server Components |
+| **Styling** | Tailwind CSS, shadcn/ui, Radix UI | Accessible, responsive components |
+| **Maps** | Leaflet, react-leaflet | Interactive centre location mapping |
+| **PDF** | html2canvas, jsPDF | Resume Builder PDF export |
+| **Storage** | Azure Table Storage | Structured data (students, jobs, programmes, volunteers) |
+| **Files** | Azure Blob Storage | Documents (Aadhar scans, resumes, certificates) |
+| **Translation** | Azure Translator | Real-time multi-language support (8+ Indian languages) |
+| **AI (ready)** | Azure OpenAI / Foundry Models | Chat, embeddings, semantic scoring (prepared, not yet activated) |
+| **Hosting** | Azure Container Apps | Containerised deployment with auto-scaling |
+| **CI/CD** | GitHub Actions | Automated build & deploy on push to master |
+| **Container** | Docker (multi-stage) | Production-optimised image (Node.js 20 Alpine) |
+| **PWA** | Service Worker, Manifest | Installable mobile app, offline support |
+
+---
+
+## Project Structure
+
+```
+src/
+├── app/                           # Next.js App Router
+│   ├── api/                       # 17+ API routes
+│   │   ├── students/              # Student CRUD, stats, risk scores
+│   │   ├── student-registrations/ # Student self-signup processing
+│   │   ├── jobs/                  # Job listings and matching
+│   │   ├── programmes/            # Training programme management
+│   │   ├── volunteers/            # Volunteer signup and management
+│   │   ├── mentor-assignments/    # Mentor-student pairing
+│   │   ├── student-progress/      # Mentee interaction tracking
+│   │   ├── alerts/                # Student alert management
+│   │   ├── translate/             # Azure Translator integration
+│   │   ├── validate-aadhar/       # Aadhar document verification
+│   │   ├── chat/                  # AI chat endpoint (streaming)
+│   │   ├── recommendations/       # Hybrid scoring endpoint
+│   │   ├── centres/               # Magic Bus centre data
+│   │   ├── seed/                  # Database seeding
+│   │   ├── storage/               # File upload operations
+│   │   └── health/                # Health check
+│   ├── student/                   # Student portal pages
+│   ├── counsellor/                # Counsellor portal pages
+│   ├── volunteer/                 # Volunteer portal pages
+│   ├── overview/                  # Solution Blueprint page
+│   ├── layout.tsx                 # Root layout with PWA registration
+│   └── page.tsx                   # Landing page
+├── components/
+│   ├── ui/                        # shadcn/ui components
+│   ├── layout/                    # Header, Sidebar, Container
+│   ├── student/                   # AadharUpload component
+│   ├── resume/                    # Resume Builder (builder, preview, steps)
+│   ├── map/                       # Leaflet centre mapping
+│   ├── translation/               # Language selector
+│   ├── counsellor/dashboard/      # Dashboard subcomponents
+│   ├── ChatWindow.tsx             # Reusable AI chat interface
+│   └── PWARegister.tsx            # PWA service worker registration
+├── lib/
+│   ├── types/                     # Domain-specific TypeScript types
+│   ├── utils/                     # Risk calculator, helpers
+│   ├── validation/                # Aadhar validator (Verhoeff algorithm)
+│   ├── hooks/                     # useTranslation (multi-language)
+│   ├── azure-tables.ts            # Azure Table Storage client
+│   ├── azure-storage.ts           # Azure Blob Storage client
+│   ├── openai.ts                  # Azure OpenAI config (ready for activation)
+│   ├── data-source.ts             # Data source abstraction (local/Azure)
+│   ├── embeddings.ts              # Vector search utilities
+│   └── scoring.ts                 # Hybrid recommendation scoring
+├── services/
+│   ├── studentService.ts          # Student data operations
+│   ├── studentTableService.ts     # Student Azure Table operations
+│   ├── jobService.ts              # Job matching service
+│   ├── jobTableService.ts         # Job Azure Table operations
+│   ├── programmeService.ts        # Programme management
+│   ├── programmeTableService.ts   # Programme Azure Table operations
+│   ├── dashboardService.ts        # Analytics & statistics
+│   ├── riskScoreService.ts        # Risk score calculations
+│   └── alertService.ts            # Alert management
+├── hooks/
+│   └── useChat.ts                 # Chat state management
+├── context/
+│   └── AppContext.tsx              # Global application state
+├── data/
+│   └── centres.ts                 # Magic Bus centre coordinates
+└── constants/                     # Application constants
+```
+
+---
+
+## Three Portals
+
+### Student Portal (`/student/`)
+For youth aged 18–25:
+- Register with guided multi-step form (profile, education, skills, aspirations, connectivity)
+- Aadhar card verification (upload or manual entry with Verhoeff validation)
+- Browse and filter upskilling programmes with eligibility matching
+- Explore matched job opportunities
+- Build professional resumes with live preview, colour schemes, and PDF export
+- Track progress, notifications, and mentor assignment status
+- AI chat support for help and guidance
+
+### Counsellor Portal (`/counsellor/`)
+For Magic Bus staff:
+- **Dashboard** — real-time analytics: student pipeline stages, risk distribution, engagement channels, referral sources
+- **At-risk panel** — highlighted students with critical risk scores (85+) and alert management
+- **Student onboarding** — guided digital signup with Aadhar verification
+- **Programme & job matching** — hybrid scoring algorithm with transparent score breakdowns
+- **Mentor assignment** — pair volunteer mentors with placed students
+- **Student directory** — search, filter by stage/risk, view detailed profiles
+
+### Volunteer Portal (`/volunteer/`)
+For Barclays mentors:
+- Quick signup with support type selection (post-placement mentoring, follow-up support)
+- Demo mode with pre-filled profiles for testing
+- Set availability schedule
+- View assigned students and track mentee progress (calls, meetings, follow-ups, notes)
+- Post-placement support tracking
+
+---
+
+## Key Features
+
+### Risk Scoring Engine
+Research-backed dropout prediction model with 7 weighted factors:
+
+| Factor | Weight | Rationale |
+|--------|--------|-----------|
+| First week attendance | 25 pts | Strongest predictor of dropout |
+| Connectivity (internet/mobile) | 20 pts | Digital access barrier |
+| Distance from centre | 15 pts | Geographic barrier |
+| First-gen graduate status | 10 pts | Family support gaps |
+| Engagement (30-day logins) | 10 pts | Behavioural indicator |
+| Contact resistance | 10 pts | Counsellor outreach response |
+| Quiz score | 10 pts | Academic performance |
+
+**Risk levels:** Low (0–39) · Medium (40–64) · High (65–84) · Critical (85–100)
+
+### Hybrid Recommendation Scoring
+Smart matching for programmes and jobs:
+```
+finalScore = (ELIGIBILITY_WEIGHT × eligibilityScore) + (SEMANTIC_WEIGHT × semanticScore)
+```
+- **Rule-based scoring** — eligibility checks (education level, skills match)
+- **Semantic scoring** — vector embeddings (programme descriptions vs student aspirations)
+- **Score breakdown** — transparent component-wise display for counsellors
+
+### Multi-Language Translation
+- 8+ Indian languages via Azure Translator (Hindi, Marathi, Tamil, Telugu, Kannada, Bengali, Gujarati, and more)
+- Real-time translation across all portal UIs
+- Client-side caching to reduce API calls
+- Graceful fallback to English on failure
+
+### Resume Builder
+- Multi-step guided form (education, experience, skills, languages)
+- Real-time live preview as the student fills in data
+- Selectable colour schemes
+- PDF download via html2canvas + jsPDF
+
+### Aadhar Validation
+- Verhoeff algorithm checksum validation (12-digit identity number)
+- Image upload with format/size validation (JPEG, PNG, WEBP; 10KB–5MB)
+- Masked display format (XXXX XXXX 1234)
+- Demo mode with hardcoded test numbers for development
+
+---
+
+## API Endpoints
+
+### Students
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/students` | List students (search, filter by stage/risk) |
+| `GET` | `/api/students?stats=true` | Student statistics |
+| `GET` | `/api/students?stats=extended` | Extended dashboard stats (engagement, referrals, risk) |
+| `GET` | `/api/students?atRisk=true` | Students with high risk scores (>70) |
+| `GET` | `/api/students/[id]` | Individual student profile |
+| `POST` | `/api/students` | Create student (requires `DATA_SOURCE=azure-table`) |
+| `POST` | `/api/student-registrations` | Student self-signup |
+
+### Jobs & Programmes
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/jobs` | List job openings |
+| `POST` | `/api/jobs` | Create job posting |
+| `GET` | `/api/programmes` | List training programmes |
+| `POST` | `/api/programmes` | Create programme |
+
+### Volunteers & Mentors
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/volunteers` | List volunteers (filter by status) |
+| `POST` | `/api/volunteers` | Volunteer signup |
+| `PUT` | `/api/volunteers` | Update volunteer profile |
+| `GET` | `/api/mentor-assignments` | Mentor-student pairings |
+| `POST` | `/api/mentor-assignments` | Assign mentor to student |
+| `GET` | `/api/student-progress` | Mentee progress tracking |
+| `POST` | `/api/student-progress` | Log interaction with student |
+
+### Alerts & Support
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/alerts` | Student alerts (unread count, filter by severity) |
+| `PATCH` | `/api/alerts` | Mark alert as read |
+| `POST` | `/api/translate` | Real-time translation via Azure Translator |
+| `POST` | `/api/validate-aadhar` | Aadhar image validation |
+| `POST` | `/api/chat` | AI chat endpoint (streaming ready) |
+| `POST` | `/api/recommendations` | Hybrid scoring for recommendations |
+
+### Utility
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/health` | Health check |
+| `GET` | `/api/centres` | Magic Bus centre data |
+| `POST` | `/api/seed` | Seed database with sample data |
+| `POST` | `/api/storage` | File upload/storage operations |
+
+---
+
+## Data Models
+
+### Core Entities
+
+**Student** — Core profile with education level, skills, aspirations, status (Active/Matched/Placed/Onboarding), and counsellor assignment.
+
+**StudentRegistration** — Self-signup data including connectivity info (internet, mobile type, preferred communication), eligibility checks, document verification status, and centre selection.
+
+**StudentExtended** — Dashboard view combining student profile with pipeline stage, risk factors, risk score, engagement data, and referral source.
+
+**Programme** — Training course with required skills, education level, duration, certification, employment rate, and average salary.
+
+**Job** — Placement opportunity with required skills, education level, salary range, industry, and openings count.
+
+**Volunteer** — Mentor profile with support types, status (pending/approved/active), and assigned students.
+
+**MentorAssignment** — Links a volunteer to a student with assignment date and status.
+
+**StudentProgress** — Interaction log (call, meeting, follow-up, note) between volunteer and student.
+
+**StudentAlert** — System-generated alerts (high risk, dropout warning, missed session, no login) with severity and read status.
+
+**MagicBusCentre** — Centre data with coordinates, serving pin codes, capacity, and current enrolment.
+
+**RiskScore** — Calculated score (0–100) with risk level, component breakdown, and last calculated timestamp.
+
+---
+
+## Getting Started
+
+### Prerequisites
 
 | Tool | Command | Purpose |
 |------|---------|---------|
+| Node.js LTS | `node` (v20+) | JavaScript runtime |
+| npm | `npm` (v10+) | Package manager |
 | Git | `git` | Version control |
-| Node.js LTS | `node`, `npm` | JavaScript runtime & package manager |
-| GitHub CLI | `gh` | GitHub operations from terminal |
-| Azure CLI | `az` | Azure resource management |
-| TypeScript | `tsc` | TypeScript compiler (global) |
+| Azure CLI | `az` | Azure resource management (for cloud features) |
 
-## Quick Start
+### Install & Run
 
 ```bash
 # Install dependencies
@@ -39,6 +382,7 @@ npm install
 
 # Copy environment file and configure
 cp .env.example .env.local
+# Edit .env.local with your Azure credentials (see Environment Variables below)
 
 # Run development server
 npm run dev
@@ -46,180 +390,93 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000)
 
-## Project Structure
-
-```
-src/
-├── app/                    # Next.js App Router
-│   ├── api/                # API routes
-│   │   ├── chat/           # Chat endpoint (streaming ready)
-│   │   ├── recommendations/# Hybrid scoring endpoint
-│   │   └── health/         # Health check
-│   ├── layout.tsx          # Root layout
-│   └── page.tsx            # Home page
-├── components/
-│   ├── ui/                 # shadcn/ui components
-│   ├── layout/             # Header, Container
-│   └── ChatWindow.tsx      # Reusable chat component
-├── lib/
-│   ├── types.ts            # TypeScript definitions
-│   ├── utils.ts            # Helper functions
-│   ├── embeddings.ts       # Vector search utilities
-│   ├── scoring.ts          # Recommendation scoring
-│   └── openai.ts           # AI client setup
-├── hooks/
-│   └── useChat.ts          # Chat state management
-├── services/
-│   └── apiClient.ts        # HTTP client wrapper
-├── context/
-│   └── AppContext.tsx      # Global state
-├── data/                   # JSON data files
-└── constants/              # App constants
-```
-
-## Available Components
-
-### UI Components (shadcn/ui)
-- `Button`, `Card`, `Input`, `Badge`, `Dialog`, `Textarea`
-
-### Custom Components
-- `ChatWindow` - Full chat interface with suggestions
-- `Header` - Navigation header
-- `Container` - Consistent layout wrapper
-
-## API Endpoints
-
-### POST /api/chat
-Send chat messages. Configure AI provider in `src/lib/openai.ts`.
-
-```typescript
-// Request
-{ message: string, context?: { userProfile?, conversationHistory? } }
-
-// Response
-{ id, role, content, createdAt }
-```
-
-### POST /api/recommendations
-Get personalized recommendations with hybrid scoring.
-
-```typescript
-// Request
-{ profile: object, quickMode?: boolean }
-
-// Response
-{ recommendations: [...], meta: { total, returned, mode, processingTimeMs } }
-```
-
-### GET /api/health
-Health check endpoint.
-
-## Patterns Used
-
-### Hybrid Scoring
-Combines rule-based eligibility checks with semantic similarity:
-```typescript
-finalScore = ELIGIBILITY_WEIGHT * eligibilityScore + SEMANTIC_WEIGHT * semanticScore
-```
-
-### RAG (Retrieval-Augmented Generation)
-Chat responses are enhanced with relevant context:
-1. Search for relevant items based on user query
-2. Inject context into system prompt
-3. Generate response with full context
-
-### Quick Mode
-Fast responses using only rule-based scoring (no AI calls).
-
-## Adding AI Support
-
-### Azure OpenAI
-1. Uncomment the Azure section in `src/lib/openai.ts`
-2. Install: `npm install @ai-sdk/azure ai openai`
-3. Configure `.env.local` with your Azure credentials
-
-### Supabase Auth
-1. Install: `npm install @supabase/ssr`
-2. Add a `src/lib/supabase.ts` client
-3. Configure `.env.local` with Supabase credentials
-
-## Commands
+### Available Commands
 
 ```bash
-npm run dev      # Development server
+npm run dev      # Development server (http://localhost:3000)
 npm run build    # Production build
 npm run start    # Start production server
 npm run lint     # Run ESLint
 ```
 
-## Docker & Azure Container Registry
+---
 
-### Prerequisites
-```powershell
-# Install Docker Desktop (via Chocolatey)
-choco install docker-desktop -y
+## Environment Variables
 
-# Or download from https://www.docker.com/products/docker-desktop
-```
+Copy `.env.example` to `.env.local` and configure:
 
-### Build Docker Image Locally
 ```bash
-# Build the image
-docker build -t mad2026 .
+# ── Data Source ──
+DATA_SOURCE=azure-table              # 'azure-table' or 'local' (CSV fallback)
 
-# Run locally
-docker run -p 3000:3000 mad2026
+# ── Azure Table Storage (structured data) ──
+AZURE_TABLE_STORAGE_CONNECTION_STRING=DefaultEndpointsProtocol=https;AccountName=...
 
-# Test at http://localhost:3000
+# ── Azure Blob Storage (documents) ──
+AZURE_STORAGE_CONNECTION_STRING=DefaultEndpointsProtocol=https;AccountName=...
+AZURE_STORAGE_CONTAINER_NAME=usethisone
+
+# ── Azure Translator (multi-language) ──
+AZURE_TRANSLATOR_KEY=your-translator-key
+AZURE_TRANSLATOR_ENDPOINT=https://api.cognitive.microsofttranslator.com
+AZURE_TRANSLATOR_REGION=global
+
+# ── Azure OpenAI (optional — AI chat, embeddings) ──
+AZURE_OPENAI_API_KEY=your-openai-key
+AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com
+AZURE_OPENAI_DEPLOYMENT=gpt-4o
+AZURE_OPENAI_EMBEDDING_DEPLOYMENT=text-embedding-3-small
+
+# ── App Configuration ──
+NEXT_PUBLIC_APP_NAME=Mission Possible
 ```
 
-### Deploy to Azure Container Registry (ACR)
+**Note:** Set `DATA_SOURCE=local` to run without Azure credentials using local CSV data files.
+
+---
+
+## Deployment
+
+### Docker (Local)
+
+```bash
+docker build -t mad2026 .
+docker run -p 3000:3000 mad2026
+```
+
+### Azure Container Apps (Production)
 
 #### 1. Create Azure Resources
+
 ```bash
-# Login to Azure
 az login
 
-# Set variables
 RESOURCE_GROUP="mad2026-rg"
-ACR_NAME="mad2026acr"          # Must be globally unique, lowercase
+ACR_NAME="mad2026acr"        # Must be globally unique, lowercase
 LOCATION="eastus"
 
-# Create resource group
 az group create --name $RESOURCE_GROUP --location $LOCATION
-
-# Create Azure Container Registry
 az acr create --resource-group $RESOURCE_GROUP --name $ACR_NAME --sku Basic
-
-# Enable admin access (for simple deployments)
 az acr update --name $ACR_NAME --admin-enabled true
 ```
 
-#### 2. Build & Push to ACR
+#### 2. Build & Push
+
 ```bash
-# Login to ACR
 az acr login --name $ACR_NAME
-
-# Build and push using ACR Tasks (no local Docker needed)
 az acr build --registry $ACR_NAME --image mad2026:latest .
-
-# Or push from local Docker
-docker tag mad2026 $ACR_NAME.azurecr.io/mad2026:latest
-docker push $ACR_NAME.azurecr.io/mad2026:latest
 ```
 
-#### 3. Deploy to Azure Container Apps
+#### 3. Deploy
+
 ```bash
-# Create Container Apps environment
 az containerapp env create \
   --name mad2026-env \
   --resource-group $RESOURCE_GROUP \
   --location $LOCATION
 
-# Get ACR credentials
 ACR_PASSWORD=$(az acr credential show --name $ACR_NAME --query "passwords[0].value" -o tsv)
 
-# Deploy container app
 az containerapp create \
   --name mad2026-app \
   --resource-group $RESOURCE_GROUP \
@@ -230,53 +487,95 @@ az containerapp create \
   --registry-server $ACR_NAME.azurecr.io \
   --registry-username $ACR_NAME \
   --registry-password $ACR_PASSWORD \
-  --env-vars NEXT_PUBLIC_APP_NAME="MAD2026"
-
-# Get the app URL
-az containerapp show --name mad2026-app --resource-group $RESOURCE_GROUP --query "properties.configuration.ingress.fqdn" -o tsv
+  --env-vars NEXT_PUBLIC_APP_NAME="Mission Possible"
 ```
 
 #### 4. Update Deployment
-```bash
-# Rebuild and push new version
-az acr build --registry $ACR_NAME --image mad2026:latest .
 
-# Update container app
+```bash
+az acr build --registry $ACR_NAME --image mad2026:latest .
 az containerapp update \
   --name mad2026-app \
   --resource-group $RESOURCE_GROUP \
   --image $ACR_NAME.azurecr.io/mad2026:latest
 ```
 
-### Environment Variables in Azure
-```bash
-# Add environment variables
-az containerapp update \
-  --name mad2026-app \
-  --resource-group $RESOURCE_GROUP \
-  --set-env-vars \
-    AZURE_OPENAI_API_KEY=secretref:openai-key \
-    AZURE_OPENAI_ENDPOINT=https://your-endpoint.openai.azure.com
+### CI/CD (GitHub Actions)
 
-# For secrets, use --secrets flag
-az containerapp update \
-  --name mad2026-app \
-  --resource-group $RESOURCE_GROUP \
-  --secrets openai-key=your-actual-api-key
-```
+The project includes a GitHub Actions workflow (`.github/workflows/deploy.yml`) that automatically builds and deploys on push to `main`/`master`. Configure these GitHub repository variables:
+
+| Variable | Example |
+|----------|---------|
+| `ACR_NAME` | `mad2026acr` |
+| `ACR_LOGIN_SERVER` | `mad2026acr.azurecr.io` |
+| `RESOURCE_GROUP` | `mad2026-rg` |
+| `CONTAINER_APP_NAME` | `mad2026-app` |
+
+And this secret:
+| Secret | Description |
+|--------|-------------|
+| `AZURE_CREDENTIALS` | Azure service principal credentials JSON |
 
 ### Cleanup
+
 ```bash
-# Delete all resources when done
 az group delete --name $RESOURCE_GROUP --yes --no-wait
 ```
 
-## Tips for Hackathon
+---
 
-1. **Start simple** - Get core features working first
-2. **Use quick mode** - Faster responses while developing
-3. **Prepare demo data** - Have pre-filled profiles ready
-4. **Test happy path** - Make the main flow flawless
-5. **Commit often** - Easy rollbacks save time
+## Roadmap
 
-Good luck!
+### Phase 1 — Production Readiness & Pilot Launch
+- Review solution design with Magic Bus leads and technology teams
+- Extensive end-to-end and integration testing across all portals
+- Full authentication system with role-based access, email verification, and password recovery
+- Fine-tune AI smart matching with real programme and job outcome data
+- SMS/WhatsApp notification integration
+
+### Phase 2 — Advanced Analytics & AI
+- AI Interview Coach — mock interview practice with feedback
+- A/B testing for engagement channels
+- ML model training on real student data
+- Predictive churn/dropout modelling
+
+### Phase 3 — Scale & Expand
+- Multi-centre deployment across India
+- Employer integration — direct job posting portal and placement pipeline
+- Integration with government skill databases
+- Operational transfer and handover to Magic Bus technology team
+
+---
+
+## Documentation
+
+Additional documentation is available in the [`docs/`](docs/) directory:
+
+| Document | Description |
+|----------|-------------|
+| [PRD.md](docs/PRD.md) | Product Requirements Document |
+| [Architecture.md](docs/Architecture.md) | System design and architecture diagrams |
+| [Decisions.md](docs/Decisions.md) | Technology choice justifications |
+| [Implementation Plan.md](docs/Implementation%20Plan.md) | Development roadmap |
+| [learnings.md](docs/learnings.md) | Lessons learned during development |
+| [AZURE_TRANSLATOR_SETUP.md](docs/AZURE_TRANSLATOR_SETUP.md) | Azure Translator setup guide |
+
+---
+
+## Important Notes for the Winning Team
+
+1. **AI Coding Agents** — This solution was largely built using AI coding agents for faster time to market. Thorough code review and testing is recommended before production use.
+
+2. **Authentication** — The current auth is placeholder-only (login UI exists but doesn't enforce access). Implementing full authentication (Supabase recommended) with role-based access control is a Phase 1 priority.
+
+3. **Data Source Toggle** — Set `DATA_SOURCE=local` in `.env.local` to run with local CSV data without Azure credentials. Set `DATA_SOURCE=azure-table` for cloud storage.
+
+4. **Demo Mode** — Several features have demo/test modes (Aadhar validation, volunteer signup) with hardcoded test data. These should be removed or gated before production.
+
+5. **Azure OpenAI** — The AI chat and embedding integrations are wired up but not yet activated. Uncomment and configure the Azure OpenAI credentials in `.env.local` to enable.
+
+6. **Solution Blueprint** — Visit `/overview` in the running app for a visual walkthrough of the solution design, goals mapping, tech stack rationale, and roadmap.
+
+---
+
+*Built by Barclays volunteers for Make a Difference 2026, in partnership with Magic Bus India Foundation.*
