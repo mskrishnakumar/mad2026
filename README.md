@@ -372,23 +372,104 @@ finalScore = (ELIGIBILITY_WEIGHT × eligibilityScore) + (SEMANTIC_WEIGHT × sema
 | Node.js LTS | `node` (v20+) | JavaScript runtime |
 | npm | `npm` (v10+) | Package manager |
 | Git | `git` | Version control |
-| Azure CLI | `az` | Azure resource management (for cloud features) |
+| Azure CLI | `az` | Azure resource management (only needed for cloud features) |
+| Docker | `docker` | Container builds (optional — only needed for Docker deployment) |
 
-### Install & Run
+### Option A: Quick Start (No Azure — Mock Data)
+
+The fastest way to get running. The app ships with seeded mock data (60 students with risk scores, alerts, pipeline stages, engagement analytics) so most features work without any external services.
 
 ```bash
-# Install dependencies
+# 1. Clone the repository
+git clone https://github.com/mskrishnakumar/mad2026.git
+cd mad2026
+
+# 2. Install dependencies
 npm install
 
-# Copy environment file and configure
+# 3. Create a minimal environment file
 cp .env.example .env.local
-# Edit .env.local with your Azure credentials (see Environment Variables below)
+```
 
-# Run development server
+Edit `.env.local` — you only need these two lines:
+
+```bash
+DATA_SOURCE=local
+NEXT_PUBLIC_APP_NAME=Mission Possible
+```
+
+```bash
+# 4. Start the development server
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000)
+
+**What works without Azure credentials:**
+
+| Feature | Route | Notes |
+|---------|-------|-------|
+| Landing page | `/` | Hero, role selection, testimonials |
+| Solution Blueprint | `/overview` | Full interactive solution walkthrough |
+| Counsellor Dashboard | `/counsellor/dashboard` | 60 seeded students, risk scores, alerts, pipeline analytics |
+| Student Portal UI | `/student/*` | Registration forms, resume builder, programme/job browsing |
+| Volunteer Portal | `/volunteer/*` | Signup, demo mode with pre-filled profiles |
+| Centre Location Map | Embedded in portals | Interactive Leaflet map with all Magic Bus centres |
+| Risk Scoring Engine | Dashboard | Full 7-factor scoring with breakdowns |
+| Resume Builder | `/student/resume` | Multi-step form, live preview, PDF export |
+
+**What requires Azure credentials:**
+
+| Feature | Required Environment Variables |
+|---------|-------------------------------|
+| Multi-language translation | `AZURE_TRANSLATOR_KEY`, `AZURE_TRANSLATOR_ENDPOINT`, `AZURE_TRANSLATOR_REGION` |
+| Document uploads (Aadhar scans, resumes) | `AZURE_STORAGE_CONNECTION_STRING`, `AZURE_STORAGE_CONTAINER_NAME` |
+| Cloud data persistence | `AZURE_TABLE_STORAGE_CONNECTION_STRING` |
+| AI chat & smart matching | `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_DEPLOYMENT` |
+
+### Option B: Full Setup (With Azure Services)
+
+For the complete experience with translation, document storage, cloud persistence, and AI features:
+
+```bash
+# 1. Clone and install
+git clone https://github.com/mskrishnakumar/mad2026.git
+cd mad2026
+npm install
+
+# 2. Create environment file with Azure credentials
+cp .env.example .env.local
+```
+
+Edit `.env.local` with all credentials (see [Environment Variables](#environment-variables) section below for the full list).
+
+```bash
+# 3. Start the development server
+npm run dev
+```
+
+```bash
+# 4. Seed the database with sample data (in a separate terminal)
+curl -X POST http://localhost:3000/api/seed
+```
+
+Open [http://localhost:3000](http://localhost:3000) — all features are now available.
+
+### Running a Production Build Locally
+
+```bash
+npm run build
+npm run start
+# App runs at http://localhost:3000 in production mode
+```
+
+### Running with Docker
+
+```bash
+docker build -t mad2026 .
+docker run -p 3000:3000 --env-file .env.local mad2026
+# App runs at http://localhost:3000
+```
 
 ### Available Commands
 
@@ -398,6 +479,17 @@ npm run build    # Production build
 npm run start    # Start production server
 npm run lint     # Run ESLint
 ```
+
+### Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| `npm install` fails | Ensure Node.js v20+ is installed (`node --version`) |
+| Port 3000 already in use | Stop the other process, or run `npm run dev -- -p 3001` |
+| Translation not working | Check `AZURE_TRANSLATOR_KEY` is set in `.env.local` |
+| Students page shows empty | Set `DATA_SOURCE=local` for mock data, or `DATA_SOURCE=azure-table` + run the seed endpoint |
+| Build errors on Windows | Use PowerShell or Git Bash; run `npm ci` if `package-lock.json` exists |
+| Docker build fails | Ensure Docker Desktop is running and you have sufficient disk space |
 
 ---
 
